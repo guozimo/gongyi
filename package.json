@@ -1,5 +1,5 @@
 {
-  "name": "jishengji-miniapp",
+  "name": "weigong",
   "version": "0.0.1",
   "description": "A WePY project",
   "main": "dist/app.js",
@@ -14,7 +14,7 @@
     "module-a": false,
     "./src/components/list": "./src/components/wepy-list.wpy"
   },
-  "author": "ximolang",
+  "author": "guozimo",
   "license": "MIT",
   "dependencies": {
     "babel": "^6.23.0",
