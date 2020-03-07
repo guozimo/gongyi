@@ -1,0 +1,32 @@
+<template>
+<web-view src="http://39.105.91.188/#/" ></web-view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class Index extends wepy.page {
+    onShareAppMessage() {
+      return {
+        title: '为公公益是你我的家园!',
+        imageUrl: '/images/logo.jpg',
+        path: `/pages/index`
+      }
+    }
+    config = {
+      navigationBarTitleText: '为公小游戏'
+    }
+    components = {
+    }
+    data = {
+    }
+
+    computed = {
+    }
+
+    methods = {
+    }
+  }
+</script>
+
+<style lang="less"> 
+</style>

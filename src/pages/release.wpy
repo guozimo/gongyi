@@ -1,0 +1,422 @@
+<template>
+<view class="head">
+    <view class="body">
+      <textarea class="content" placeholder='这一刻的想法' bindinput='input' value="{{content}}"></textarea>
+      <view class="img_urls">
+        <view class="img_item" wx:for="{{pics}}">
+          <image src="{{item.path}}" class="image" mode='aspectFill' />
+          <view class="close" bindtap='close' data-src="{{item.path}}">X</view>
+        </view>
+        <view wx:if="{{pics.length<9}}" class="img_add" bindtap='choose'>+</view>
+      </view>
+      <view class="module">
+        <view class="module_item">
+            <button bindgetuserinfo ='getUserInfo' 
+            open-type='getUserInfo'
+            class="module_name" style="color:red;text-align:center;width:100%">
+            发布
+            </button>
+        </view>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Index extends wepy.page {
+  onShareAppMessage() {
+    return {
+      title: '为公公益是你我的家园!',
+      imageUrl: '/images/logo.jpg',
+      path: `/pages/index`
+    }
+  }
+  config = {
+    navigationBarTitleText: '发表动态',
+    // navigationBarBackgroundColor: '#00D1CF',
+    navigationBarTextStyle: 'white'
+  };
+  data = {
+    userinfo: null,
+    content: null,
+    pics: [],
+    code: null
+  };
+  methods = {
+      // 删除已添加的图片
+    close(e) {
+      wx.showModal({
+        title: '提示',
+        content: '确认删除？',
+        success: res => {
+          if (res.confirm) {
+            // this.setData({
+            //   pics: this.data.pics.filter(v => {
+            //     return v.path != e.currentTarget.dataset.src
+            //   })
+            // })
+            let pics = this.pics.filter(v => {
+              return v.path != e.currentTarget.dataset.src
+            })
+            this.pics = pics
+            this.$apply()
+          }
+        }
+      })
+    },
+  // 添加图片
+    choose() {
+      wx.chooseImage({
+        count: 9 - this.pics.length,
+        sizeType: ['compressed'],
+        sourceType: ['album', 'camera'],
+        success: res => {
+          // this.setData({
+          //   pics: this.data.pics.concat(res.tempFiles)
+          // })
+          this.pics = this.pics.concat(res.tempFiles)
+          this.$apply()
+        }
+      })
+    },
+  // 设置content值
+    input(value) {
+      this.content = value.detail.value
+    },
+  // 发布事件
+    send(img_urls) {
+      wx.request({
+        url: util.url + 'c=wechat&m=insert',
+        data: {
+          code: this.code,
+          user_name: this.userinfo.nickName,
+          user_avatar: this.userinfo.avatarUrl,
+          content: this.content,
+          img_urls: img_urls || '',
+          publish_address: '..'
+        },
+        success: res => {
+          wx.setStorageSync('openid', res.data)
+          wx.hideLoading()
+          wx.showToast({
+            title: '发布成功',
+            success: res => {
+              wx.switchTab({
+                url: '/pages/index'
+              })
+            }
+          })
+        }
+      })
+    },
+  // 拿到用户信息并尝试发布
+    getUserInfo(e) {
+      wx.login({
+        success: res => {
+          // this.setData({
+          //   code: res.code
+          // })
+          this.code = res.code
+          console.log('获取到的用户信息', e.detail.userInfo)
+          if (e.detail.userInfo) {
+            wx.setStorageSync('userInfo', e.detail.userInfo)
+            // this.setData({
+            //   userinfo: e.detail.userInfo
+            // })
+            this.userinfo = e.detail.userInfo
+            if (!this.content) {
+              wx.showToast({
+                title: '请输入内容',
+                icon: 'none'
+              })
+              return
+            }
+
+            if (this.pics.length) {
+              let img_urls = []
+              for (let i = 0; i < this.pics.length; i++) {
+                wx.uploadFile({
+                  url: util.url + 'c=wechat&m=upload',
+                  filePath: this.pics[i].path,
+                  name: 'f',
+                  success: res => {
+                    img_urls.push(res.data)
+                    if (img_urls.length == this.pics.length) {
+                      this.send(img_urls.join(';'))
+                    }
+                  }
+                })
+              }
+            } else {
+              this.send()
+            }
+          } else {
+            wx.showToast({
+              title: '无授权暂时不提供发布功能',
+              icon: 'none'
+            })
+          }
+        },
+        fail: () => {
+          wx.showToast({
+            title: '出錯了',
+            icon: 'none'
+          })
+        }
+      })
+    }
+  }
+}
+</script>
+<style lang="less">
+button::after{
+border:none;
+}
+input{
+outline:none;
+border:none;
+list-style: none;
+}
+  .curtain{
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, .5);
+  position: relative;
+}
+.window{
+  width: 562rpx;
+  height: 478rpx;
+  background-color: #f9f7fa;
+  border-radius: 10rpx;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  margin: auto;
+}
+.window_head{
+  width: 100%;
+  height: 88rpx;
+  font-size: 32rpx;
+  font-weight: 700rpx;
+  color: black;
+  text-align: center;
+  line-height: 88rpx;
+}
+.window_middle{
+  width: 100%;
+  height: 308rpx;
+  padding:0 56rpx;
+  border-top: 2rpx solid #e1dfe2;
+}
+.window_box{
+  width: 100%;
+  height: 132rpx;
+  position: relative;
+}
+.window_icon{
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background-color: black;
+  background: no-repeat center center/100% auto;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+}
+.request{
+  width: 100%;
+  height: 58rpx;
+  font-size: 28rpx;
+  color: black;  
+  text-align: center;
+}
+.request_word{
+  width: 100%;
+  height: 116rpx;
+  padding-top: 31rpx;
+  color: #808080;
+  font-size: 24rpx;
+  text-align: center;
+  border-top: 2rpx solid #e1dfe2;
+}
+
+
+.window_bottom{
+  width:100%;
+  height: 82rpx;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+.window_cancel{
+  width: 50%;
+  height: 100%;
+  border-right: 1px solid #e1dfe2;
+  border-top: 1px solid #e1dfe2;
+  color: black;
+  font-size: 29rpx;
+  line-height: 82rpx;
+  text-align: center;
+}
+.window_confirm{
+  width: 50%;
+  height: 100%;
+  /* border-left: 1px solid #e1dfe2; */
+  border-top: 1px solid #e1dfe2;
+  color: #0dad00;
+  font-size: 29rpx;
+  line-height: 82rpx;
+  text-align: center;
+}
+.window_confirmb{
+  width: 100%;
+  height: 100%;
+  color: #0dad00;
+  font-size: 29rpx;
+  line-height: 82rpx;
+  text-align: center;
+}
+button::after{
+  border: none;
+}
+.head{
+  width: 100%;
+  height: auto;
+  padding: 23rpx 22rpx 0 22rpx
+}
+.button{
+  width: 100%;
+  height: 106rpx;
+  padding-bottom: 70rpx;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  font-size: 30rpx;
+  color: black;
+}
+.button_left{
+  font-size: 30rpx;
+}
+.button_middle{
+  width: 191rpx;
+  height: 100%;
+  overflow: hidden;
+  line-height: 40rpx;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 30rpx;  
+}
+.button_right{
+  font-size: 30rpx;
+  
+}
+.body{
+  // width: 100%;
+  height: auto;
+  padding: 0 39rpx;
+}
+.content{
+  min-height: 139rpx;
+}
+.content::-webkit-input-placeholder{
+  font-size: 29rpx;
+}
+.img_urls{
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  margin-bottom: 183rpx;
+
+}
+.img_item{
+  width: 202rpx;
+  height: 201rpx;
+  /* background: blue; */
+  background: no-repeat center center/100% auto;
+  margin-right: 8rpx;
+  float: left;
+  position: relative;
+  overflow: hidden;
+}
+.image{
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.img_add{
+  width: 202rpx;
+  height: 201rpx;
+  font-size: 59rpx;
+  text-align: center;
+  line-height: 201rpx;
+  background: #f2f2f2;
+  margin-right: 8rpx;
+  float: left;
+  color: #9f9f9f;
+}
+.close{
+  width: 100rpx;
+  height: 100rpx;
+  background-color: rgba(0, 0, 0, .5);
+  border-radius: 50%;
+  padding:60rpx 0 0 25rpx;
+  text-align: left;
+  position: absolute;
+  top: -25%;
+  right: -25%;
+  font-size: 20rpx;
+  color: white;
+  z-index: 999;
+}
+
+
+.module{
+  width: 100%;
+  height: auto;
+
+}
+.module_item{
+  width: 100%;
+  height: 102rpx;
+  border-top: 2rpx solid #f1f1f1;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+.module_left{
+  display: flex;
+}
+.module_licon{
+  width: 58rpx;
+  height: 102rpx;
+  /* background: blue; */
+  background: no-repeat center center/100% auto;
+  background-size: 60%;
+}
+.module_name{
+  line-height: 102rpx;
+  color: black;
+  font-size: 29rpx;
+  padding-left: 22rpx;
+}
+.module_right{
+  width: 72rpx;
+  height: 102rpx;
+  overflow: hidden;
+}
+.module_ricon{
+  width: 58rpx;
+  height: 102rpx;
+  /* background-color: blue; */
+  background: no-repeat center center/100% auto;
+  background-size: 60%;  
+}
+.module_item:last-child{
+  border-bottom: 2rpx solid #f1f1f1;
+}
+</style>

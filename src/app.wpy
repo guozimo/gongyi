@@ -1,0 +1,106 @@
+<style lang="less">
+page{
+  height: 100%;
+  background-color: #f9fbff;
+}
+@font-face {
+  font-family: 'iconfont';  /* project id 573053 */
+  src: url('//at.alicdn.com/t/font_573053_6w688di648xxyldi.eot');
+  src: url('//at.alicdn.com/t/font_573053_6w688di648xxyldi.eot?#iefix') format('embedded-opentype'),
+  url('//at.alicdn.com/t/font_573053_6w688di648xxyldi.woff') format('woff'),
+  url('//at.alicdn.com/t/font_573053_6w688di648xxyldi.ttf') format('truetype'),
+  url('//at.alicdn.com/t/font_573053_6w688di648xxyldi.svg#iconfont') format('svg');
+}
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+import regeneratorRuntime from '@/utils/runtime'
+console.log(regeneratorRuntime)
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/index',
+      'pages/me',
+      'pages/learnGroup/index',
+      'pages/release', // 发表
+      'pages/active/active',
+      'pages/about'// 关于我们页面
+      // 子页面
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#138cff',
+      navigationBarTitleText: 'WeChat',
+      navigationBarTextStyle: 'white',
+      backgroundColor: '#138cff'
+    },
+    tabBar: {
+      color: '#757982',
+      selectedColor: '#138cff',
+      borderStyle: 'white',
+      backgroundColor: '#fff',
+      list: [
+        {
+          pagePath: 'pages/index',
+          text: '圈子',
+          iconPath: 'images/tabbar/index.png',
+          selectedIconPath: 'images/tabbar/index-on.png'
+        },
+        {
+          pagePath: 'pages/release',
+          text: '发表',
+          iconPath: 'images/tabbar/release.png',
+          selectedIconPath: 'images/tabbar/releaseactive.png'
+        },
+        {
+          pagePath: 'pages/me',
+          text: '我的',
+          iconPath: 'images/tabbar/me.png',
+          selectedIconPath: 'images/tabbar/me-on.png'
+        }
+      ]
+    }
+  }
+
+  globalData = {
+    userInfo: null
+  }
+
+  constructor () {
+    super()
+    this.use('requestfix')
+  }
+
+  onLaunch() {
+    this.testAsync()
+  }
+
+  sleep (s) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve('promise resolved')
+      }, s * 1000)
+    })
+  }
+
+  async testAsync () {
+    const data = await this.sleep(3)
+    console.log(data)
+  }
+
+  getUserInfo(cb) {
+    const that = this
+    if (this.globalData.userInfo) {
+      return this.globalData.userInfo
+    }
+    wepy.getUserInfo({
+      success (res) {
+        that.globalData.userInfo = res.userInfo
+        cb && cb(res.userInfo)
+      }
+    })
+  }
+}
+</script>

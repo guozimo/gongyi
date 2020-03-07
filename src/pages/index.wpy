@@ -1,0 +1,377 @@
+<template>
+<!-- 仿微信朋友圈 -->
+<scroll-view class='page'>
+  <!-- 列表 -->
+  <view class='CircleList' wx:for='{{DataSource}}'>
+    <!-- 头像、昵称、内容 -->
+    <view class='body-view'>
+      <!-- 头像 -->
+      <view class='left-view'>
+        <image class='user-icon' src='{{icon}}'></image>
+      </view>
+      <view class='right-view' bindtap='TouchDiscuss'>
+        <!-- 昵称 -->
+        <view class='user-name-view'>
+          <label class='user-name'>宣志强</label>
+        </view>
+        <!-- 内容 -->
+        <view class='user-content-view'>
+          <text class='user-content'>{{content}}</text>
+        </view>
+        <!-- 图片 -->
+        <view class='photo-view'>
+          <view class='photo' wx:for='{{resource}}' style='width:{{photoWidth}}px;height:{{photoWidth}}px'>
+            <image bindtap='LookPhoto' data-photUrl='{{item}}' src='{{item}}' style='width:{{photoWidth}}px;height:{{photoWidth}}px'></image>
+          </view>
+        </view>
+        <!-- 地理位置 -->
+        <view class='user-address-view'>
+          <label>长沙市天心区芙蓉南路四段158号地理信息产业园总部基地A座9楼</label>
+        </view>
+
+        <!-- 时间、删除按钮、点赞评论按钮 -->
+        <view class='TDD-view'>
+          <label>2018-07-25 10:14:23</label>
+          <button bindtap='delete'>删除</button>
+          <image data-isShow='{{isShow}}'  src='/images/wxdiscuss.png' data-id='discuss'></image>
+          <image  src='/images/zan.png' wx:if='{{!isShow&&needZan}}' class='zan_box' @tap='changeStatus'/>
+           <image  src='/images/cancel.png' wx:if='{{!isShow&&!needZan}}' class='zan_box' @tap='changeStatus'/>
+        </view>
+
+        <!-- 点赞 -->
+        <view class='zan-view'>
+          <view class='trigon-view'>
+            <image mode='aspectFill' class='trigon' src='/images/trigon.png'></image>
+          </view>
+
+          <!-- 点赞 -->
+          <view class='zan-bg-view'>
+            <view class='zan-user-view' wx:for='{{zanSource}}'>
+              <label bindtap='TouchZanUser' data-name='{{item}}' class='zan-user'>{{item}},</label>
+            </view>
+          </view>
+          <view class='line'></view>
+          <!-- 评论 -->
+          <view class='discuss-view'>
+            <view class='discuss' wx:for='{{contnet}}'>
+              <label bindtap='TouchZanUser' data-name='{{item.firstname}}' class='discuss-user'>{{item.firstname}}：</label>
+              <label class='content'>{{item.content}}</label>
+            </view>
+          </view>
+        </view>
+      </view>
+
+    </view>
+  </view>
+</scroll-view>
+
+<!-- 评论按钮弹出框 -->
+<view animation="{{animation}}" class='pop-up-box' style='top:{{popTop}}px;width: {{popWidth}}px;'>
+</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  export default class Index extends wepy.page {
+    onShareAppMessage() {
+      return {
+        title: '为公公益是你我的家园!',
+        imageUrl: '/images/logo.jpg',
+        path: `/pages/index`
+      }
+    }
+    config = {
+      navigationBarTitleText: '圈子'
+    }
+    components = {
+    }
+
+    data = {
+      DataSource: [1, 1, 1, 1, 1],
+      icon: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3175633703,3855171020&fm=27&gp=0.jpg',
+      content: '我大学毕业到一家集团公司的办公室当文员。办公室主任有一特长，即文章写得好，很有思想，公司董事长很器重他，董事长的讲话稿和企业的年终总结等一系列重大文章都是出自他的手笔。',
+      resource: ['http://img2.imgtn.bdimg.com/it/u=2118739199,3378602431&fm=27&gp=0.jpg',
+        'http://img0.imgtn.bdimg.com/it/u=2277942808,1417432970&fm=27&gp=0.jpg',
+        'http://img5.imgtn.bdimg.com/it/u=1504812505,3480403568&fm=27&gp=0.jpg',
+        'http://img4.imgtn.bdimg.com/it/u=3456219059,4251129897&fm=27&gp=0.jpg',
+        'http://img3.imgtn.bdimg.com/it/u=3912316188,1981132393&fm=27&gp=0.jpg'
+      ],
+      zanSource: ['张三', '李四', '王五', '找钱', '孙俪', '王宝'],
+      contnet: [{
+        'firstname': '张三',
+        'content': '你好漂亮呀！！'
+      },
+      {
+        'firstname': '李四',
+        'content': '纳尼！！'
+      },
+      {
+        'firstname': '王五',
+        'content': '鬼扯咧'
+      },
+      {
+        'firstname': '王宝',
+        'content': '昨晚11点左右，一则郑爽胡彦斌疑似复合的消息刷爆各大论坛，微博在深夜11点热度高达200万直接爆掉，中国意难忘又开始了！！！'
+      }
+      ],
+      photoWidth: wx.getSystemInfoSync().windowWidth / 5,
+      popTop: 0, // 弹出点赞评论框的位置
+      popWidth: 0, // 弹出框宽度
+      isShow: true, // 判断是否显示弹出框，
+      needZan: true
+
+    }
+
+    computed = {
+    }
+
+    methods = {
+      changeStatus() {
+      // 切换状态
+        this.needZan = !this.needZan
+        this.isShow = true
+      },
+       // 点击图片进行大图查看
+      LookPhoto: function(e) {
+        wx.previewImage({
+          current: e.currentTarget.dataset.photurl,
+          urls: this.resource
+        })
+      },
+
+  // 点击点赞的人
+      TouchZanUser: function(e) {
+        wx.showModal({
+          title: e.currentTarget.dataset.name,
+          showCancel: false
+        })
+      },
+
+  // 删除朋友圈
+      delete: function() {
+        wx.showToast({
+          title: '删除成功'
+        })
+      },
+
+  // 点击了点赞评论
+      TouchDiscuss: function(e) {
+        console.log(e, 'e======')
+        if (e.target.dataset.id !== 'discuss') {
+          this.isShow = true
+        } else {
+          this.isShow = !this.isShow
+        }
+      }
+    }
+
+    events = {
+    }
+
+    onLoad() {
+    }
+  }
+</script>
+
+<style lang="less">
+/* pages/CircleFriends/CircleFriends.wxss */
+page{
+  background: whitesmoke;
+}
+
+.page{
+  width: 100%;
+  /* overflow-x: hidden */
+}
+
+/* 列表 */
+.CircleList{
+  background: white;
+  margin-bottom: 1px;
+  border-bottom: 1px solid whitesmoke;
+  border-top: 1px solid whitesmoke;
+}
+
+.body-view{
+  display: flex;
+}
+
+.left-view{
+  width: 150rpx;
+  /* background: rebeccapurple; */
+}
+
+.right-view{
+  /* background: red; */
+}
+
+/* 头像 */
+.user-icon{
+  /* display: flex; */
+  width:100rpx;
+  height: 100rpx;
+  margin-left: 20rpx;
+  margin-top: 30rpx;
+  margin-right: 20rpx;
+}
+
+/* 昵称 */
+.user-name{
+  display: flex;
+  height: 50rpx;
+  line-height: 50rpx;
+  font-size: 18px;
+  color: rgb(88, 103, 138);
+  margin-top: 30rpx;
+  margin-left: 10rpx;
+}
+
+/* 内容 */
+.user-content{
+  display: flex;
+  font-size: 18px;
+  line-height: 50rpx;
+  margin-left: 10rpx;
+}
+
+/* 图片 */
+.photo-view{
+  background: rebeccapurple;
+  margin-left: 10rpx;
+  margin-bottom: 20rpx;
+}
+.photo{
+  background: rgb(255, 166, 0);  
+  float: left;
+  margin-right: 10rpx;
+  margin-top: 10rpx;
+}
+
+/* 地理位置 */
+.user-address-view{
+  display: flex;
+  margin-top: 20rpx;
+  width: 100%;
+}
+.user-address-view label{
+  font-size: 12px;
+  margin: 10rpx;
+}
+
+/* 时间、删除、点赞评论 */
+.TDD-view{
+  width: 100%;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  background: white;
+  position:relative;
+   .zan_box{
+    width:150rpx;
+    height:60rpx;
+    display:block;
+    position:absolute;
+    top:0;
+    right:55rpx;
+  }
+}
+.TDD-view label{
+  font-size: 13px;
+  margin-left: 10rpx;
+}
+.TDD-view button{
+  font-size: 13px;
+  margin-left: 20rpx;
+  color: black;
+  background: white;
+}
+.TDD-view button::after{
+  border: white;
+}
+.TDD-view image{
+  width: 50rpx;
+  height: 40rpx;
+  margin-right: 20rpx;
+}
+
+/* 点赞 */
+.zan-view {
+  width: 100%;
+  background: white;
+  margin-bottom: 20rpx;
+}
+.trigon-view{
+  /* height: 20rpx; */
+  margin-bottom: -15rpx;
+}
+.trigon{
+  display: flex;
+  width: 40rpx;
+  height: 20rpx;
+  margin-top: 10rpx;
+  margin-left: 10rpx;
+}
+.zan-bg-view{
+  display: inline-block;
+  width: 97%;
+  background: rgb(235, 235, 235);
+  margin-right: 20rpx;
+  margin-bottom: -11rpx;
+  border-top-left-radius: 7rpx;
+  border-top-right-radius: 7rpx;
+}
+.zan-user-view{
+  display: flex;
+  float: left;
+  height: 40rpx;
+  margin-left: 10rpx;
+  /* margin-top: 5rpx; */
+  align-content: center;
+}
+.zan-user{
+  font-size: 12px;
+  line-height: 40rpx;
+  height: 40rpx;
+  color: rgb(88, 103, 138);
+}
+
+.line{
+  width: 97%;
+  height: 1px;
+  background: white;
+}
+
+/* 评论 */
+.discuss-view{
+  background: white;
+  width: 97%;
+}
+
+.discuss{
+  background: rgb(235, 235, 235);
+  line-height: 35rpx;
+}
+
+.discuss label{
+  font-size: 12px;
+}
+
+.discuss-user{
+  color: rgb(88, 103, 138);
+  margin-left: 10rpx;
+}
+
+.content{
+  margin-left: 10rpx;
+}
+
+/* 弹出框 */
+.pop-up-box{
+  position: absolute;
+  height: 60rpx;
+  border-radius: 10rpx;
+  right: 90rpx;
+  background: rgba(0, 0, 0, 0.7);
+ 
+}
+</style>
