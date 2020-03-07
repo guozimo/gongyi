@@ -2,7 +2,7 @@
 <view>
 <scroll-view class='page'>
   <!-- 列表 -->
-  <view class='CircleList' wx:for='{{DataSource}}'>
+  <view class='CircleList' wx:for-items="{{DataSource}}" wx:for-index="index" wx:for-item="item" wx:key="id" >
     <!-- 头像、昵称、内容 -->
     <view class='body-view'>
       <!-- 头像 -->
@@ -25,14 +25,14 @@
           </view>
         </view>
         <!-- 地理位置 -->
-        <view class='user-address-view'>
+        <!-- <view class='user-address-view'>
           <label>长沙市天心区芙蓉南路四段158号地理信息产业园总部基地A座9楼</label>
-        </view>
+        </view> -->
 
         <!-- 时间、删除按钮、点赞评论按钮 -->
         <view class='TDD-view'>
           <label>2018-07-25 10:14:23</label>
-          <button bindtap='delete'>删除</button>
+          <button bindtap='delete' wx:if='{{item.userName===userName}}'>删除</button>
           <image data-isShow='{{isShow}}'  src='/images/wxdiscuss.png' data-id='discuss'></image>
           <image  src='/images/zan.png' wx:if='{{!isShow&&needZan}}' class='zan_box' @tap='changeStatus'/>
            <image  src='/images/cancel.png' wx:if='{{!isShow&&!needZan}}' class='zan_box' @tap='changeStatus'/>
@@ -46,18 +46,19 @@
 
           <!-- 点赞 -->
           <view class='zan-bg-view'>
+            <view class='heart'>💘</view>
             <view class='zan-user-view' wx:for='{{zanSource}}'>
               <label bindtap='TouchZanUser' data-name='{{item}}' class='zan-user'>{{item}},</label>
             </view>
           </view>
           <view class='line'></view>
           <!-- 评论 -->
-          <view class='discuss-view'>
+          <!-- <view class='discuss-view'>
             <view class='discuss' wx:for='{{contnet}}'>
               <label bindtap='TouchZanUser' data-name='{{item.firstname}}' class='discuss-user'>{{item.firstname}}：</label>
               <label class='content'>{{item.content}}</label>
             </view>
-          </view>
+          </view> -->
         </view>
       </view>
 
@@ -91,7 +92,7 @@
     }
 
     data = {
-      DataSource: [1, 1, 1, 1, 1],
+      DataSource: [{'userName': '宣志强'}, {'userName': '张强'}, {'userName': '张强'}, {'userName': '张强'}, {'userName': '东子'}],
       icon: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3175633703,3855171020&fm=27&gp=0.jpg',
       content: '我大学毕业到一家集团公司的办公室当文员。办公室主任有一特长，即文章写得好，很有思想，公司董事长很器重他，董事长的讲话稿和企业的年终总结等一系列重大文章都是出自他的手笔。',
       resource: ['http://img2.imgtn.bdimg.com/it/u=2118739199,3378602431&fm=27&gp=0.jpg',
@@ -122,7 +123,8 @@
       popTop: 0, // 弹出点赞评论框的位置
       popWidth: 0, // 弹出框宽度
       isShow: true, // 判断是否显示弹出框，
-      needZan: true
+      needZan: true,
+      userName: wx.getStorageSync('userInfo').nickName || ''
 
     }
 
@@ -331,13 +333,20 @@ page{
   margin-left: 10rpx;
 }
 .zan-bg-view{
-  display: inline-block;
+  display:inline-block;
   width: 97%;
   background: rgb(235, 235, 235);
   margin-right: 20rpx;
   margin-bottom: -11rpx;
   border-top-left-radius: 7rpx;
   border-top-right-radius: 7rpx;
+  position:relative;
+  .heart{
+   display: flex;
+  float: left;
+  margin-left: 10rpx;
+  margin-top:-5rpx;
+   }
 }
 .zan-user-view{
   display: flex;
