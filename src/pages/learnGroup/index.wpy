@@ -18,7 +18,7 @@ export default class Index extends wepy.page {
   onShareAppMessage() {
     return {
       title: '为公公益是你我的家园!',
-      imageUrl: '/images/logo.jpg',
+      imageUrl: 'http://39.105.91.188/static/image/fm.jpg',
       path: `/pages/index`
     }
   }
@@ -63,6 +63,7 @@ export default class Index extends wepy.page {
     background:#138cff;
     width:100%;
     height:100%;
+    overflow: hidden;
     padding:66rpx 50rpx 50rpx 50rpx;
     .box{
       width:650rpx;
