@@ -48,7 +48,7 @@
           <view class='zan-bg-view'>
             <view class='heart'>💘</view>
             <view class='zan-user-view' wx:for-items="{{item.zan}}" wx:for-index="index" wx:for-item="one1" wx:key="id">
-              <label bindtap='TouchZanUser' data-name='{{one1.name}}' class='zan-user'>{{one1.name}},</label>
+              <label bindtap='TouchZanUser' data-name='{{one1.name}}' class='zan-user'>{{one1.name?one1.name+',':''}}</label>
             </view>
           </view>
           <view class='line'></view>
@@ -150,14 +150,16 @@
                 _id:this.feedObj.contents[index]._id || '',
                 opera: "delete",
                 openid:this.openId || '',
-                code: ''
+                code: '',
+                name:this.userName || ''
               },
               header: {
-                'Content-Type': 'aplication/json'
+                'Content-Type': 'application/json'
               },
               success: res => {
                   console.log('取消点赞返回的数据res', res)
-                  wepy.showToast({
+                  if(res.data.status){
+                 wepy.showToast({
                   title: '取消点赞成功',
                   icon: 'none',
                   duration: 3000
@@ -166,6 +168,14 @@
                 let len = this.feedObj.contents[index].zan.length-1
                 this.feedObj.contents[index].zan.splice(len,1)
                 this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
+                  } else {
+                  wepy.showToast({
+                  title: '取消点赞失败',
+                  icon: 'none',
+                  duration: 3000
+                })
+                }
+                 
                 this.$apply()
               },
               fail: error => {
@@ -192,21 +202,30 @@
                 _id:this.feedObj.contents[index]._id || '',
                 opera: "insert",
                 openid:this.openId || '',
-                code: ''
+                code: '',
+                name:this.userName || ''
               },
               header: {
-                'Content-Type': 'aplication/json'
+                'Content-Type': 'application/json'
               },
               success: res => {
                   console.log('已登录点赞返回的数据res', res)
+                  if(res.data.status){
                   wepy.showToast({
                   title: '点赞成功',
                   icon: 'none',
                   duration: 3000
                 })
                 // zan 列表中把自己的名字本地加入
-                this.feedObj.contents[index].zan.push({'openId': this.openId, 'name': this.userName})
+                this.feedObj.contents[index].zan.push({'openid': this.openId, 'name': this.userName})
                 this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
+                } else {
+                  wepy.showToast({
+                  title: '点赞失败',
+                  icon: 'none',
+                  duration: 3000
+                  })
+                }
                 this.$apply()
               },
               fail: error => {
@@ -232,14 +251,16 @@
                  _id:this.feedObj.contents[index]._id || '',
                 opera: "insert",
                 openid:'',
-                code: this.code || ''
+                code: this.code || '',
+                name:this.userName || '💗'
               },
               header: {
-                'Content-Type': 'aplication/json'
+                'Content-Type': 'application/json'
               },
               success: res => {
                   console.log('未登录无感登录点赞返回的数据res', res)
-                  wepy.showToast({
+                   if(res.data.status){
+                 wepy.showToast({
                   title: '点赞成功',
                   icon: 'none',
                   duration: 3000
@@ -251,6 +272,14 @@
                 // zan 列表中把自己的名字本地加入
                 this.feedObj.contents[index].zan.push({'openid': res.data.openid|| '', 'name': '💗'})
                 this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
+                   } else {
+                   showToast({
+                    title: '点赞失败',
+                  icon: 'none',
+                  duration: 3000
+                  })
+                   }
+                 
                 this.$apply()
                 //未登录直接刷新列表
               },
