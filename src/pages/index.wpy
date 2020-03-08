@@ -149,7 +149,7 @@
               data: {
                 _id:this.feedObj.contents[index]._id || '',
                 opera: "delete",
-                openid:this.openId || '',
+                openid:wx.getStorageSync('openId') || '',
                 code: '',
                 name:this.userName || ''
               },
@@ -193,7 +193,7 @@
             })
        } else {
          // 未登录或者登录未点赞
-         if(this.openId){
+         if(wx.getStorageSync('openId')){
            // 如果是已经登录未点赞 发送点赞请求 发openId
              wx.request({
               url: this.baseUrl + '/zan',
@@ -201,7 +201,7 @@
               data: {
                 _id:this.feedObj.contents[index]._id || '',
                 opera: "insert",
-                openid:this.openId || '',
+                openid:wx.getStorageSync('openId') || '',
                 code: '',
                 name:this.userName || ''
               },
@@ -320,9 +320,28 @@
 
   // 删除朋友圈
       delete: function() {
-        wx.showToast({
+        this.deletePiece()
+      },
+      deletePiece(){
+        // 删除单条动态
+         wx.request({
+         url: this.baseUrl + '/delete',
+         header: {
+        'content-type': 'application/json' // 默认值
+         },
+        method: 'POST',
+        success: res => {
+        console.log('删除动态返回的数据', res)
+         wx.showToast({
           title: '删除成功'
         })
+         },
+        fail: function (error) {
+        wepy.hideLoading()
+        console.error('删除单条数据失败', error)
+        wepy.showToast({title: '删除数据失败'})
+         }
+       })
       },
 
   // 点击了点赞评论
@@ -439,6 +458,7 @@ page{
   margin-left: 20rpx;
   margin-top: 30rpx;
   margin-right: 20rpx;
+  border-radius: 50%
 }
 
 /* 昵称 */
