@@ -103,7 +103,7 @@ export default class Index extends wepy.page {
     },
   // 拿到用户信息并尝试发布
     getUserInfo(e) {
-      if (this.openId) {
+      if (wx.getStorageSync('openId')) {
         if (!this.content) {
           wepy.showToast({
             title: '请输入内容',
