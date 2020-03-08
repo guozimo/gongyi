@@ -21,7 +21,7 @@
         <!-- 图片 -->
         <view class='photo-view'>
           <view class='photo'  wx:for-items="{{item.imgUrls}}" wx:for-index="index" wx:for-item="one" wx:key="id" style='width:{{photoWidth}}px;height:{{photoWidth}}px'>
-            <image bindtap='LookPhoto' data-photUrl='{{one}}' src='{{one}}' style='width:{{photoWidth}}px;height:{{photoWidth}}px'></image>
+            <image bindtap='LookPhoto({{item.imgUrls}})' data-photUrl='{{one}}' src='{{one}}' style='width:{{photoWidth}}px;height:{{photoWidth}}px'></image>
           </view>
         </view>
         <!-- 地理位置 -->
@@ -32,7 +32,7 @@
         <!-- 时间、删除按钮、点赞评论按钮 -->
         <view class='TDD-view'>
           <label>{{item.publishTime}}</label>
-          <button bindtap='delete' wx:if='{{item.openId===openId}}'>删除</button>
+          <button bindtap='delete' wx:if='{{item.openid===openId}}'>删除</button>
           <image    src='/images/wxdiscuss.png' @tap ='TouchDiscuss({{index}})'></image>
           <image  src='/images/zan.png' wx:if='{{item.isShow&&!item.hasZan}}' class='zan_box' @tap='changeStatus({{index}})'/>
            <image  src='/images/cancel.png' wx:if='{{item.isShow&&item.hasZan}}' class='zan_box' @tap='changeStatus({{index}})'/>
@@ -94,29 +94,29 @@
 
     data = {
       openId: wx.getStorageSync('openId') || '',
-      feedObj: {
-        'contents': [{
-          '_id': '5e6449f21c86150e47a2d31c',
-          'publishTime': 1583630834865,
-          'openId': '1',
-          'name': 'weidong',
-          'headImg': 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIPV2S8CfAd8AodjiacVHtibGOz9a5BQVsKIvNorQjonGiamPAU2Zzk5SH9kVJH1yv4rR4IM2M7AplfQ/132',
-          '__v': 0,
-          'zan': [{'openId': 'x9ks8a7wsic47jvq', 'name': '白安'}],
-          'imgUrls': ['http://39.105.91.188/static/image/fm.jpg']
-        }, {
-          '_id': '5e637c56da556a841bd0d643',
-          'publishTime': 1583578198091,
-          'text': '调用接口',
-          'openId': 'b9iqatg0uq9nj78d',
-          'name': '忆丹',
-          'headImg': 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIPV2S8CfAd8AodjiacVHtibGOz9a5BQVsKIvNorQjonGiamPAU2Zzk5SH9kVJH1yv4rR4IM2M7AplfQ/132',
-          '__v': 0,
-          'zan': [],
-          'imgUrls': ['http://39.105.91.188/static/image/fm.jpg']
-        }]
-      },
-      feedObj1:{},
+      // feedObj: {
+      //   'contents': [{
+      //     '_id': '5e6449f21c86150e47a2d31c',
+      //     'publishTime': 1583630834865,
+      //     'openId': '1',
+      //     'name': 'weidong',
+      //     'headImg': 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIPV2S8CfAd8AodjiacVHtibGOz9a5BQVsKIvNorQjonGiamPAU2Zzk5SH9kVJH1yv4rR4IM2M7AplfQ/132',
+      //     '__v': 0,
+      //     'zan': [{'openId': 'x9ks8a7wsic47jvq', 'name': '白安'}],
+      //     'imgUrls': ['http://39.105.91.188/static/image/fm.jpg']
+      //   }, {
+      //     '_id': '5e637c56da556a841bd0d643',
+      //     'publishTime': 1583578198091,
+      //     'text': '调用接口',
+      //     'openId': 'b9iqatg0uq9nj78d',
+      //     'name': '忆丹',
+      //     'headImg': 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIPV2S8CfAd8AodjiacVHtibGOz9a5BQVsKIvNorQjonGiamPAU2Zzk5SH9kVJH1yv4rR4IM2M7AplfQ/132',
+      //     '__v': 0,
+      //     'zan': [],
+      //     'imgUrls': ['http://39.105.91.188/static/image/fm.jpg']
+      //   }]
+      // },
+      feedObj:{contents:[]},
       code:'',
       photoWidth: wx.getSystemInfoSync().windowWidth / 5,
       popTop: 0, // 弹出点赞评论框的位置
@@ -147,9 +147,9 @@
               url: this.baseUrl + '/zan',
               method: 'POST',
               data: {
-                _id:'',
+                _id:this.feedObj.contents[index]._id || '',
                 opera: "delete",
-                openId:this.openId || '',
+                openid:this.openId || '',
                 code: ''
               },
               header: {
@@ -189,9 +189,9 @@
               url: this.baseUrl + '/zan',
               method: 'POST',
               data: {
-                _id:'',
+                _id:this.feedObj.contents[index]._id || '',
                 opera: "insert",
-                openId:this.openId || '',
+                openid:this.openId || '',
                 code: ''
               },
               header: {
@@ -229,9 +229,9 @@
               url: this.baseUrl + '/zan',
               method: 'POST',
               data: {
-                _id:'',
+                 _id:this.feedObj.contents[index]._id || '',
                 opera: "insert",
-                openId:'',
+                openid:'',
                 code: this.code || ''
               },
               header: {
@@ -249,7 +249,7 @@
                  wx.setStorageSync('openId',res.data.openid)
                 }
                 // zan 列表中把自己的名字本地加入
-                this.feedObj.contents[index].zan.push({'openId': res.data.openid|| '', 'name': '💗'})
+                this.feedObj.contents[index].zan.push({'openid': res.data.openid|| '', 'name': '💗'})
                 this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
                 this.$apply()
                 //未登录直接刷新列表
@@ -274,10 +274,10 @@
      // this.feedObj.contents[index].hasZan= !this.feedObj.contents[index].hasZan
       },
        // 点击图片进行大图查看
-      LookPhoto: function(e) {
+      LookPhoto: function(item,e) {
         wx.previewImage({
           current: e.currentTarget.dataset.photurl,
-          urls: this.feedObj.imgUrls || []
+          urls: item || []
         })
       },
 
@@ -313,21 +313,9 @@
       method: 'GET',
       success: res => {
         console.log('获取的用户feed列表成功', res)
-        wepy.hideLoading()
-        
-      },
-      fail: function (error) {
-        wepy.hideLoading()
-        console.error('获取用户feed列表失败', error)
-        wepy.showToast({title: '获取用户feed列表失败'})
-      }
-    })
-  }
-    onLoad() {
-      // 获取列表的接口
-      this.getFeed()
-      console.log('this.feedobj.contents', this.feedObj.contents[0].imgUrls)
-      this.feedObj.contents = this.feedObj.contents.length && this.feedObj.contents.map((item) => {
+        if(res.data){
+         this.feedObj = res.data
+         this.feedObj.contents = this.feedObj.contents.length && this.feedObj.contents.map((item) => {
         if (item.publishTime) {
           item.publishTime = timestampToTime(item.publishTime)
         }
@@ -335,7 +323,7 @@
         // 还需要判断如果展示了box 展示的类型是点赞还是取消
         let hasZan = false
          hasZan = item.zan.length&&item.zan.some((one)=>{
-               return one.openId === this.openId
+               return one.openid === this.openId
          });
          if(hasZan) { 
            // 如果列表中已经存在你自己的赞了 那么就显示取消
@@ -350,6 +338,24 @@
 
         return item
       })
+          this.$apply()
+        }
+        wepy.hideLoading()
+        
+      },
+      fail: function (error) {
+        wepy.hideLoading()
+        console.error('获取用户feed列表失败', error)
+        wepy.showToast({title: 'feed列表失败'})
+      }
+    })
+  }
+    onLoad() {
+    }
+    onShow(){
+  // 获取列表的接口 发文章跳过来的操作
+      // console.log(this.openId,"openId")
+      this.getFeed()
     }
   }
 </script>

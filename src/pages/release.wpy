@@ -230,7 +230,7 @@ export default class Index extends wepy.page {
         gender: wx.getStorageSync('userInfo').gender || 1,
         text: this.content || '',
         imgs: img_urls || [],
-        openId: wx.getStorageSync('openId') || ''
+        openid: wx.getStorageSync('openId') || ''
       },
       success: res => {
         console.log('只发文字返回的数据res.data====', res.data)
@@ -277,7 +277,7 @@ export default class Index extends wepy.page {
         gender: this.userinfo.gender || 1,
         text: this.content || '',
         imgs: img_urls || [],
-        openId: this.openId || ''
+        openid: this.openId || ''
       },
       success: res => {
         console.log('只发文字返回的数据res.data====', res.data)
