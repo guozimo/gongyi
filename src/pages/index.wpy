@@ -2,26 +2,26 @@
 <view>
 <scroll-view class='page'>
   <!-- 列表 -->
-  <view class='CircleList' wx:for-items="{{DataSource}}" wx:for-index="index" wx:for-item="item" wx:key="id" >
+  <view class='CircleList' wx:for-items="{{feedObj.contents}}" wx:for-index="index" wx:for-item="item" wx:key="id" >
     <!-- 头像、昵称、内容 -->
     <view class='body-view'>
       <!-- 头像 -->
       <view class='left-view'>
-        <image class='user-icon' src='{{icon}}'></image>
+        <image class='user-icon' src='{{item.headImg}}'></image>
       </view>
-      <view class='right-view' bindtap='TouchDiscuss'>
+      <view class='right-view' >
         <!-- 昵称 -->
         <view class='user-name-view'>
-          <label class='user-name'>宣志强</label>
+          <label class='user-name'>{{item.name}}</label>
         </view>
         <!-- 内容 -->
         <view class='user-content-view'>
-          <text class='user-content'>{{content}}</text>
+          <text class='user-content'>{{item.text}}</text>
         </view>
         <!-- 图片 -->
         <view class='photo-view'>
-          <view class='photo' wx:for='{{resource}}' style='width:{{photoWidth}}px;height:{{photoWidth}}px'>
-            <image bindtap='LookPhoto' data-photUrl='{{item}}' src='{{item}}' style='width:{{photoWidth}}px;height:{{photoWidth}}px'></image>
+          <view class='photo'  wx:for-items="{{item.imgUrls}}" wx:for-index="index" wx:for-item="one" wx:key="id" style='width:{{photoWidth}}px;height:{{photoWidth}}px'>
+            <image bindtap='LookPhoto' data-photUrl='{{one}}' src='{{one}}' style='width:{{photoWidth}}px;height:{{photoWidth}}px'></image>
           </view>
         </view>
         <!-- 地理位置 -->
@@ -31,15 +31,15 @@
 
         <!-- 时间、删除按钮、点赞评论按钮 -->
         <view class='TDD-view'>
-          <label>2018-07-25 10:14:23</label>
-          <button bindtap='delete' wx:if='{{item.userName===userName}}'>删除</button>
-          <image data-isShow='{{isShow}}'   src='/images/wxdiscuss.png' data-id='discuss'></image>
-          <image  src='/images/zan.png' wx:if='{{!isShow&&needZan}}' class='zan_box' @tap='changeStatus'/>
-           <image  src='/images/cancel.png' wx:if='{{!isShow&&!needZan}}' class='zan_box' @tap='changeStatus'/>
+          <label>{{item.publishTime}}</label>
+          <button bindtap='delete' wx:if='{{item.openId===openId}}'>删除</button>
+          <image    src='/images/wxdiscuss.png' @tap ='TouchDiscuss({{index}})'></image>
+          <image  src='/images/zan.png' wx:if='{{item.isShow&&!item.hasZan}}' class='zan_box' @tap='changeStatus({{index}})'/>
+           <image  src='/images/cancel.png' wx:if='{{item.isShow&&item.hasZan}}' class='zan_box' @tap='changeStatus({{index}})'/>
         </view>
 
         <!-- 点赞 -->
-        <view class='zan-view'>
+        <view class='zan-view' wx:if='{{item.zan.length}}'>
           <view class='trigon-view'>
             <image mode='aspectFill' class='trigon' src='/images/trigon.png'></image>
           </view>
@@ -47,8 +47,8 @@
           <!-- 点赞 -->
           <view class='zan-bg-view'>
             <view class='heart'>💘</view>
-            <view class='zan-user-view' wx:for='{{zanSource}}'>
-              <label bindtap='TouchZanUser' data-name='{{item}}' class='zan-user'>{{item}},</label>
+            <view class='zan-user-view' wx:for-items="{{item.zan}}" wx:for-index="index" wx:for-item="one1" wx:key="id">
+              <label bindtap='TouchZanUser' data-name='{{one1.name}}' class='zan-user'>{{one1.name}},</label>
             </view>
           </view>
           <view class='line'></view>
@@ -77,6 +77,7 @@
 
 <script>
   import wepy from 'wepy'
+  import {timestampToTime} from '@/utils/util'
   export default class Index extends wepy.page {
     onShareAppMessage() {
       return {
@@ -93,39 +94,34 @@
 
     data = {
       openId: wx.getStorageSync('openId') || '',
-      DataSource: [{'userName': '宣志强'}, {'userName': '张强'}, {'userName': '张强'}, {'userName': '张强'}, {'userName': '东子'}],
-      icon: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3175633703,3855171020&fm=27&gp=0.jpg',
-      content: '我大学毕业到一家集团公司的办公室当文员。办公室主任有一特长，即文章写得好，很有思想，公司董事长很器重他，董事长的讲话稿和企业的年终总结等一系列重大文章都是出自他的手笔。',
-      resource: ['http://img2.imgtn.bdimg.com/it/u=2118739199,3378602431&fm=27&gp=0.jpg',
-        'http://img0.imgtn.bdimg.com/it/u=2277942808,1417432970&fm=27&gp=0.jpg',
-        'http://img5.imgtn.bdimg.com/it/u=1504812505,3480403568&fm=27&gp=0.jpg',
-        'http://img4.imgtn.bdimg.com/it/u=3456219059,4251129897&fm=27&gp=0.jpg',
-        'http://img3.imgtn.bdimg.com/it/u=3912316188,1981132393&fm=27&gp=0.jpg'
-      ],
-      zanSource: ['张三', '李四', '王五', '找钱', '孙俪', '王宝'],
-      contnet: [{
-        'firstname': '张三',
-        'content': '你好漂亮呀！！'
+      feedObj: {
+        'contents': [{
+          '_id': '5e6449f21c86150e47a2d31c',
+          'publishTime': 1583630834865,
+          'openId': '1',
+          'name': 'weidong',
+          'headImg': 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIPV2S8CfAd8AodjiacVHtibGOz9a5BQVsKIvNorQjonGiamPAU2Zzk5SH9kVJH1yv4rR4IM2M7AplfQ/132',
+          '__v': 0,
+          'zan': [{'openId': 'x9ks8a7wsic47jvq', 'name': '白安'}],
+          'imgUrls': ['http://39.105.91.188/static/image/fm.jpg']
+        }, {
+          '_id': '5e637c56da556a841bd0d643',
+          'publishTime': 1583578198091,
+          'text': '调用接口',
+          'openId': 'b9iqatg0uq9nj78d',
+          'name': '忆丹',
+          'headImg': 'https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIPV2S8CfAd8AodjiacVHtibGOz9a5BQVsKIvNorQjonGiamPAU2Zzk5SH9kVJH1yv4rR4IM2M7AplfQ/132',
+          '__v': 0,
+          'zan': [],
+          'imgUrls': ['http://39.105.91.188/static/image/fm.jpg']
+        }]
       },
-      {
-        'firstname': '李四',
-        'content': '纳尼！！'
-      },
-      {
-        'firstname': '王五',
-        'content': '鬼扯咧'
-      },
-      {
-        'firstname': '王宝',
-        'content': '昨晚11点左右，一则郑爽胡彦斌疑似复合的消息刷爆各大论坛，微博在深夜11点热度高达200万直接爆掉，中国意难忘又开始了！！！'
-      }
-      ],
+      code:'',
       photoWidth: wx.getSystemInfoSync().windowWidth / 5,
       popTop: 0, // 弹出点赞评论框的位置
       popWidth: 0, // 弹出框宽度
-      isShow: true, // 判断是否显示弹出框，
-      needZan: true,
-      userName: wx.getStorageSync('userInfo').nickName || ''
+      userName: wx.getStorageSync('userInfo').nickName || '',
+      baseUrl: 'http://39.105.91.188:8000/api'
 
     }
 
@@ -138,16 +134,149 @@
           url: '/pages/active/active'
         })
       },
-      changeStatus() {
+      changeStatus(index) {
       // 切换状态
-        this.needZan = !this.needZan
-        this.isShow = true
+       this.feedObj.contents[index].isShow= false
+       // 请求点赞或者取消点赞的接口
+       // 如果当前是已经点赞状态 那么用户是登录状态 点击进行取消点赞 发送取消点赞的请求
+       // 如果当前是未点赞状态 那么用户是未登录或者已经登录还未点赞
+       if(this.feedObj.contents[index].hasZan){
+         // 已经对某条数据进行了点赞 //发送取消点赞的请求
+          wx.request({
+              url: this.baseUrl + '/zan',
+              method: 'POST',
+              data: {
+                _id:'',
+                opera: "delete",
+                openId:this.openId || '',
+                code: ''
+              },
+              header: {
+                'Content-Type': 'aplication/json'
+              },
+              success: res => {
+                  console.log('取消点赞返回的数据res', res)
+                  wepy.showToast({
+                  title: '取消点赞成功',
+                  icon: 'none',
+                  duration: 3000
+                })
+                // zan 列表中把自己的名字本地除去
+                let len = this.feedObj.contents[index].zan.length-1
+                this.feedObj.contents[index].zan.splice(len,1)
+                this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
+                this.$apply()
+              },
+              fail: error => {
+                console.log('取消点赞失败', error)
+                // mock的数据
+                // let len = this.feedObj.contents[index].zan.length-1
+                // this.feedObj.contents[index].zan.splice(len,1)
+                // this.$apply()
+                wepy.showToast({
+                  title: '取消点赞失败',
+                  icon: 'none',
+                  duration: 3000
+                })
+              }
+            })
+       } else {
+         // 未登录或者登录未点赞
+         if(this.openId){
+           // 如果是已经登录未点赞 发送点赞请求 发openId
+             wx.request({
+              url: this.baseUrl + '/zan',
+              method: 'POST',
+              data: {
+                _id:'',
+                opera: "insert",
+                openId:this.openId || '',
+                code: ''
+              },
+              header: {
+                'Content-Type': 'aplication/json'
+              },
+              success: res => {
+                  console.log('已登录点赞返回的数据res', res)
+                  wepy.showToast({
+                  title: '点赞成功',
+                  icon: 'none',
+                  duration: 3000
+                })
+                // zan 列表中把自己的名字本地加入
+                this.feedObj.contents[index].zan.push({'openId': this.openId, 'name': this.userName})
+                this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
+                this.$apply()
+              },
+              fail: error => {
+                console.log('已登录点赞失败', error)
+                wepy.showToast({
+                  title: '点赞失败',
+                  icon: 'none',
+                  duration: 3000
+                })
+              }
+            })
+         } else {
+           // 未登录 发送点赞请求
+           // 首先需要登录
+            wepy.login({
+             success: res => {
+            this.code = res.code
+
+             wx.request({
+              url: this.baseUrl + '/zan',
+              method: 'POST',
+              data: {
+                _id:'',
+                opera: "insert",
+                openId:'',
+                code: this.code || ''
+              },
+              header: {
+                'Content-Type': 'aplication/json'
+              },
+              success: res => {
+                  console.log('未登录无感登录点赞返回的数据res', res)
+                  wepy.showToast({
+                  title: '点赞成功',
+                  icon: 'none',
+                  duration: 3000
+                })
+                // 把openid 存入storage中
+                if(res.data.openId){
+                 wx.setStorageSync('openId',res.data.openId)
+                }
+                // zan 列表中把自己的名字本地加入
+                this.feedObj.contents[index].zan.push({'openId': res.data.openId, 'name': '💗'})
+                this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
+                this.$apply()
+                //未登录直接刷新列表
+              },
+              fail: error => {
+                console.log('无感知登录点赞失败', error)
+                wepy.showToast({
+                  title: '点赞失败',
+                  icon: 'none',
+                  duration: 3000
+                })
+                // mock的数据
+                // this.feedObj.contents[index].zan.push({'openId': '', 'name': '💗'})
+                // this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
+                this.$apply()
+              }
+            })
+            }
+            })
+         }
+       }
+     // this.feedObj.contents[index].hasZan= !this.feedObj.contents[index].hasZan
       },
        // 点击图片进行大图查看
       LookPhoto: function(e) {
         wx.previewImage({
           current: e.currentTarget.dataset.photurl,
-          urls: this.resource
+          urls: this.feedObj.imgUrls || []
         })
       },
 
@@ -167,20 +296,59 @@
       },
 
   // 点击了点赞评论
-      TouchDiscuss: function(e) {
-        console.log(e, 'e======')
-        if (e.target.dataset.id !== 'discuss') {
-          this.isShow = true
-        } else {
-          this.isShow = !this.isShow
-        }
+      TouchDiscuss: function(index) {
+       this.feedObj.contents[index].isShow= !this.feedObj.contents[index].isShow
       }
     }
 
     events = {
     }
-
+  getFeed(){ 
+    wx.request({
+      url: this.baseUrl + '/get',
+      header: {
+        'content-type': 'application/json' // 默认值
+      },
+      method: 'GET',
+      success: res => {
+        console.log('获取的用户feed列表成功', res)
+        wepy.hideLoading()
+        
+      },
+      fail: function (error) {
+        wepy.hideLoading()
+        console.error('获取用户feed列表失败', error)
+        wepy.showToast({title: '获取用户feed列表失败'})
+      }
+    })
+  }
     onLoad() {
+      // 获取列表的接口
+      this.getFeed()
+      console.log('this.feedobj.contents', this.feedObj.contents[0].imgUrls)
+      this.feedObj.contents = this.feedObj.contents.length && this.feedObj.contents.map((item) => {
+        if (item.publishTime) {
+          item.publishTime = timestampToTime(item.publishTime)
+        }
+        item.isShow = false// 这个参数是默认不出展示box的
+        // 还需要判断如果展示了box 展示的类型是点赞还是取消
+        let hasZan = false
+         hasZan = item.zan.length&&item.zan.some((one)=>{
+               return one.openId === this.openId
+         });
+         if(hasZan) { 
+           // 如果列表中已经存在你自己的赞了 那么就显示取消
+           item.hasZan = true
+         } else {
+           // 没有匹配到 要么是没有登录 要么是登录了 但是确实没有你的赞 你需要进行点赞操作
+           // 登录如何做 没有登录如何做
+           item.hasZan = false
+         }
+
+
+
+        return item
+      })
     }
   }
 </script>

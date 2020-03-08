@@ -61,32 +61,36 @@ export const GetItem = (key) => {
 }
 
 // 格式化日期
-export const formatTime = (date) => {
-  var year = date.getFullYear()
-  var month = date.getMonth() + 1
-  var day = date.getDate()
-  var hour = date.getHours()
-  var minute = date.getMinutes()
-  var second = date.getSeconds()
-  return [year, month, day].map(formatNumber).concat([hour, minute, second].map(formatNumber))
-}
-
-function formatNumber(n) {
-  n = n.toString()
-  return n[1] ? n : '0' + n
-}
-export const formatTime1 = date => {
-  const year = date.getFullYear()
-  const month = date.getMonth() + 1
-  const day = date.getDate()
-  const hour = date.getHours()
-  const minute = date.getMinutes()
-  const second = date.getSeconds()
-
-  return [year, month, day].map(formatNumber).join('/') + ' ' + [hour, minute, second].map(formatNumber).join(':')
-}
-
-export const formatNumber1 = n => {
-  n = n.toString()
-  return n[1] ? n : '0' + n
+export function timestampToTime(timestamp) {
+  var tempString = '' + timestamp
+  if (tempString.length === 13) {
+    timestamp = timestamp / 1000
+  }
+  function zeroize(num) {
+    return (String(num).length == 1 ? '0' : '') + num
+  }
+  var curTimestamp = parseInt(new Date().getTime() / 1000) // 当前时间戳
+  var timestampDiff = curTimestamp - timestamp // 参数时间戳与当前时间戳相差秒数
+  var curDate = new Date(curTimestamp * 1000) // 当前时间日期对象
+  var tmDate = new Date(timestamp * 1000)  // 参数时间戳转换成的日期对象
+  var Y = tmDate.getFullYear(), m = tmDate.getMonth() + 1, d = tmDate.getDate()
+  var H = tmDate.getHours(), i = tmDate.getMinutes(), s = tmDate.getSeconds()
+  if (timestampDiff < 60) { // 一分钟以内
+    return '刚刚'
+  } else if (timestampDiff < 3600) { // 一小时之内
+    return Math.floor(timestampDiff / 60) + '分钟前'
+  } else if (timestampDiff / 3600 >= 1 && timestampDiff / 3600 < 24) { // 24小时前
+    return Math.floor(timestampDiff / 3600) + '小时前'
+  } else {
+    var newDate = new Date((curTimestamp - 86400) * 1000) // 参数中的时间戳加一天转换成的日期对象
+    if (newDate.getFullYear() == Y && newDate.getMonth() + 1 == m && newDate.getDate() == d) {
+      return '昨天' + zeroize(H) + ':' + zeroize(i)
+    } else if (timestampDiff / 3600 / 24 <= 9) {
+      return Math.floor(timestampDiff / 3600 / 24) + '天前'
+    } else if (curDate.getFullYear() == Y) {
+      return zeroize(m) + '-' + zeroize(d)
+    } else {
+      return Y + '-' + zeroize(m) + '-' + zeroize(d)
+    }
+  }
 }
