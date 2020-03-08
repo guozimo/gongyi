@@ -46,7 +46,6 @@ export default class Index extends wepy.page {
     openId: wx.getStorageSync('openId') || ''
   };
   onLoad() {
-    // console.log('wx.getStorageSync.nickName===', wx.getStorageSync('userInfo').nickName)
   }
   methods = {
       // 删除已添加的图片
