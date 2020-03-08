@@ -37,14 +37,16 @@ export default class Index extends wepy.page {
     navigationBarTextStyle: 'white'
   };
   data = {
+    code: '',
     userinfo: null,
     content: null,
     pics: [],
-    code: null,
     baseUrl: 'http://39.105.91.188:8000/api',
-    fileData: ''
+    fileData: '',
+    openId: wx.getStorageSync('openId') || ''
   };
   onLoad() {
+    // console.log('wx.getStorageSync.nickName===', wx.getStorageSync('userInfo').nickName)
   }
   methods = {
       // 删除已添加的图片
@@ -101,74 +103,166 @@ export default class Index extends wepy.page {
     },
   // 拿到用户信息并尝试发布
     getUserInfo(e) {
-      wepy.login({
-        success: res => {
-          this.code = res.code
-          console.log('获取到的用户信息', e.detail.userInfo)
-          if (e.detail.userInfo) {
-            wx.setStorageSync('userInfo', e.detail.userInfo)
+      if (this.openId) {
+        if (!this.content) {
+          wepy.showToast({
+            title: '请输入内容',
+            icon: 'none'
+          })
+          return
+        }
+
+        if (this.pics.length) {
+          let img_urls = []
+          for (let i = 0; i < this.pics.length; i++) {
+            wx.request({
+              url: this.baseUrl + '/post-img',
+              method: 'POST',
+              data: this.pics[i].path,
+              header: {
+                'Content-Type': 'text/plain;charset=UTF-8'
+              },
+              success: res => {
+                img_urls.push(res.data)
+                if (img_urls.length === this.pics.length) {
+                     // this.send(img_urls.join(';'))
+                  this.send(img_urls)
+                }
+              },
+              fail: error => {
+                console.log('上传图片失败', error)
+                wepy.showToast({
+                  title: '上传图片失败',
+                  icon: 'none',
+                  duration: 3000
+                })
+              }
+            })
+          }
+        } else {
+              // 不发图片只发文字的请求test
+          wepy.showLoading()
+              // this.send()
+          this.send()
+        }
+      } else {
+        wepy.login({
+          success: res => {
+            this.code = res.code
+            console.log('code=====', this.code)
+            console.log('获取到的用户信息', e.detail.userInfo)
+            if (e.detail.userInfo) {
+              wx.setStorageSync('userInfo', e.detail.userInfo)
             // this.setData({
             //   userinfo: e.detail.userInfo
             // })
-            this.userinfo = e.detail.userInfo
-            if (!this.content) {
-              wepy.showToast({
-                title: '请输入内容',
-                icon: 'none'
-              })
-              return
-            }
-
-            if (this.pics.length) {
-              let img_urls = []
-              for (let i = 0; i < this.pics.length; i++) {
-                wx.request({
-                  url: this.baseUrl + '/post-img',
-                  method: 'POST',
-                  data: this.pics[i].path,
-                  header: {
-                    'Content-Type': 'text/plain;charset=UTF-8'
-                  },
-                  success: res => {
-                    img_urls.push(res.data)
-                    if (img_urls.length === this.pics.length) {
-                     // this.send(img_urls.join(';'))
-                      this.sendLetter(img_urls)
-                    }
-                  },
-                  fail: error => {
-                    console.log('上传图片失败', error)
-                    wepy.showToast({
-                      title: '上传图片失败',
-                      icon: 'none',
-                      duration: 3000
-                    })
-                  }
+              this.userinfo = e.detail.userInfo
+              if (!this.content) {
+                wepy.showToast({
+                  title: '请输入内容',
+                  icon: 'none'
                 })
+                return
+              }
+
+              if (this.pics.length) {
+                let img_urls = []
+                for (let i = 0; i < this.pics.length; i++) {
+                  wx.request({
+                    url: this.baseUrl + '/post-img',
+                    method: 'POST',
+                    data: this.pics[i].path,
+                    header: {
+                      'Content-Type': 'text/plain;charset=UTF-8'
+                    },
+                    success: res => {
+                      img_urls.push(res.data)
+                      if (img_urls.length === this.pics.length) {
+                     // this.send(img_urls.join(';'))
+                        this.sendLetter(img_urls)
+                      }
+                    },
+                    fail: error => {
+                      console.log('上传图片失败', error)
+                      wepy.showToast({
+                        title: '上传图片失败',
+                        icon: 'none',
+                        duration: 3000
+                      })
+                    }
+                  })
+                }
+              } else {
+              // 不发图片只发文字的请求test
+                wepy.showLoading()
+              // this.send()
+                this.sendLetter()
               }
             } else {
-              // 不发图片只发文字的请求test
-              wepy.showLoading()
-              // this.send()
-              this.sendLetter()
+              wepy.showToast({
+                title: '无授权暂时不提供发布功能',
+                icon: 'none'
+              })
             }
-          } else {
+          },
+          error: err => {
             wepy.showToast({
-              title: '无授权暂时不提供发布功能',
+              title: '出错了',
               icon: 'none'
             })
           }
-        },
-        error: err => {
-          wepy.showToast({
-            title: '出错了',
-            icon: 'none'
-          })
-        }
-      })
+        })
+      }
     }
   }
   // 发布事件
+  send(img_urls) {
+    wx.request({
+      url: this.baseUrl + '/text',
+      header: {
+        'content-type': 'application/json' // 默认值
+      },
+      method: 'POST',
+      data: {
+        code: '',
+        user_name: wx.getStorageSync('userInfo').nickName || '为公官方',
+        user_avatar: wx.getStorageSync('userInfo').avatarUrl || '',
+        gender: wx.getStorageSync('userInfo').gender || 1,
+        text: this.content || '',
+        imgs: img_urls || [],
+        openId: wx.getStorageSync('openId') || ''
+      },
+      success: res => {
+        console.log('只发文字返回的数据res.data====', res.data)
+        wepy.hideLoading()
+        if (res.data.status === 1) {
+          // 发布成功
+          wx.showToast({
+            title: res.data.msg || '发布成功',
+            duration: 1000,
+            success: function() {
+              setTimeout(() => {
+                wepy.switchTab({
+                  url: '/pages/index'
+                })
+              }, 1000)
+            }
+          })
+        } else {
+          // 发布失败
+          wx.showToast({
+            title: res.data.msg || '发布失败',
+            duration: 3000
+          })
+        }
+      },
+      fail: function (error) {
+        wepy.hideLoading()
+        console.error('只发文字请求接口失败=', error)
+        wepy.showToast({title: '发布失败'})
+      }
+    })
+  }
   sendLetter(img_urls) {
     wx.request({
       url: this.baseUrl + '/text',
@@ -182,13 +276,16 @@ export default class Index extends wepy.page {
         user_avatar: this.userinfo.avatarUrl || '',
         gender: this.userinfo.gender || 1,
         text: this.content || '',
-        imgs: img_urls || []
+        imgs: img_urls || [],
+        openId: this.openId || ''
       },
       success: res => {
         console.log('只发文字返回的数据res.data====', res.data)
         wepy.hideLoading()
         if (res.data.status === 1) {
           // 发布成功
+          let openId = res.data.openId || ''
+          wx.setStorageSync('openId', openId)
           wx.showToast({
             title: res.data.msg || '发布成功',
             duration: 1000,

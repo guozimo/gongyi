@@ -33,7 +33,7 @@
         <view class='TDD-view'>
           <label>2018-07-25 10:14:23</label>
           <button bindtap='delete' wx:if='{{item.userName===userName}}'>删除</button>
-          <image data-isShow='{{isShow}}'  src='/images/wxdiscuss.png' data-id='discuss'></image>
+          <image data-isShow='{{isShow}}'   src='/images/wxdiscuss.png' data-id='discuss'></image>
           <image  src='/images/zan.png' wx:if='{{!isShow&&needZan}}' class='zan_box' @tap='changeStatus'/>
            <image  src='/images/cancel.png' wx:if='{{!isShow&&!needZan}}' class='zan_box' @tap='changeStatus'/>
         </view>
@@ -92,6 +92,7 @@
     }
 
     data = {
+      openId: wx.getStorageSync('openId') || '',
       DataSource: [{'userName': '宣志强'}, {'userName': '张强'}, {'userName': '张强'}, {'userName': '张强'}, {'userName': '东子'}],
       icon: 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=3175633703,3855171020&fm=27&gp=0.jpg',
       content: '我大学毕业到一家集团公司的办公室当文员。办公室主任有一特长，即文章写得好，很有思想，公司董事长很器重他，董事长的讲话稿和企业的年终总结等一系列重大文章都是出自他的手笔。',
@@ -234,6 +235,7 @@ page{
   margin-left: 20rpx;
   margin-top: 30rpx;
   margin-right: 20rpx;
+  border-radius:50%
 }
 
 /* 昵称 */
@@ -288,8 +290,8 @@ page{
   background: white;
   position:relative;
    .zan_box{
-    width:150rpx;
-    height:60rpx;
+    width:160rpx;
+    height:68rpx;
     display:block;
     position:absolute;
     top:0;
