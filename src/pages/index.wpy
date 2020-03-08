@@ -151,7 +151,7 @@
                 opera: "delete",
                 openid:wx.getStorageSync('openId') || '',
                 code: '',
-                name:this.userName || ''
+                name:wx.getStorageSync('userInfo').nickName || ''
               },
               header: {
                 'Content-Type': 'application/json'
@@ -203,7 +203,7 @@
                 opera: "insert",
                 openid:wx.getStorageSync('openId') || '',
                 code: '',
-                name:this.userName || ''
+                name:wx.getStorageSync('userInfo').nickName || ''
               },
               header: {
                 'Content-Type': 'application/json'
@@ -217,7 +217,7 @@
                   duration: 3000
                 })
                 // zan 列表中把自己的名字本地加入
-                this.feedObj.contents[index].zan.push({'openid': this.openId, 'name': this.userName})
+                this.feedObj.contents[index].zan.push({'openid': this.openId, 'name': wx.getStorageSync('userInfo').nickName})
                 this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
                 } else {
                   wepy.showToast({
@@ -243,7 +243,6 @@
             wepy.login({
              success: res => {
             this.code = res.code
-
              wx.request({
               url: this.baseUrl + '/zan',
               method: 'POST',
@@ -252,7 +251,7 @@
                 opera: "insert",
                 openid:'',
                 code: this.code || '',
-                name:this.userName || '💗'
+                name:wx.getStorageSync('userInfo').nickName || '💗'
               },
               header: {
                 'Content-Type': 'application/json'
