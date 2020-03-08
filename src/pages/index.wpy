@@ -116,6 +116,7 @@
           'imgUrls': ['http://39.105.91.188/static/image/fm.jpg']
         }]
       },
+      feedObj1:{},
       code:'',
       photoWidth: wx.getSystemInfoSync().windowWidth / 5,
       popTop: 0, // 弹出点赞评论框的位置
@@ -244,11 +245,11 @@
                   duration: 3000
                 })
                 // 把openid 存入storage中
-                if(res.data.openId){
-                 wx.setStorageSync('openId',res.data.openId)
+                if(res.data.openid){
+                 wx.setStorageSync('openId',res.data.openid)
                 }
                 // zan 列表中把自己的名字本地加入
-                this.feedObj.contents[index].zan.push({'openId': res.data.openId, 'name': '💗'})
+                this.feedObj.contents[index].zan.push({'openId': res.data.openid|| '', 'name': '💗'})
                 this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
                 this.$apply()
                 //未登录直接刷新列表
@@ -403,7 +404,6 @@ page{
   margin-left: 20rpx;
   margin-top: 30rpx;
   margin-right: 20rpx;
-  border-radius:50%
 }
 
 /* 昵称 */
