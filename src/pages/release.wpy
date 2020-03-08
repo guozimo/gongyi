@@ -103,6 +103,8 @@ export default class Index extends wepy.page {
     },
   // 拿到用户信息并尝试发布
     getUserInfo(e) {
+      wx.setStorageSync('userInfo', e.detail.userInfo)
+      this.userinfo = e.detail.userInfo
       if (wx.getStorageSync('openId')) {
         if (!this.content) {
           wepy.showToast({
@@ -152,11 +154,8 @@ export default class Index extends wepy.page {
             console.log('code=====', this.code)
             console.log('获取到的用户信息', e.detail.userInfo)
             if (e.detail.userInfo) {
-              wx.setStorageSync('userInfo', e.detail.userInfo)
-            // this.setData({
-            //   userinfo: e.detail.userInfo
-            // })
-              this.userinfo = e.detail.userInfo
+             // wx.setStorageSync('userInfo', e.detail.userInfo)
+              // this.userinfo = e.detail.userInfo
               if (!this.content) {
                 wepy.showToast({
                   title: '请输入内容',
