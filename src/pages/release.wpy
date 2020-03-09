@@ -102,49 +102,59 @@ export default class Index extends wepy.page {
     },
   // 拿到用户信息并尝试发布
     getUserInfo(e) {
+      // 第一次都要走授权弹窗的
       wx.setStorageSync('userInfo', e.detail.userInfo)
       this.userinfo = e.detail.userInfo
       if (wx.getStorageSync('openId')) {
-        if (!this.content) {
-          wepy.showToast({
-            title: '请输入内容',
-            icon: 'none'
-          })
-          return
-        }
-
-        if (this.pics.length) {
-          let img_urls = []
-          for (let i = 0; i < this.pics.length; i++) {
-            wx.request({
-              url: this.baseUrl + '/post-img',
-              method: 'POST',
-              data: this.pics[i].path,
-              header: {
-                'Content-Type': 'text/plain;charset=UTF-8'
-              },
-              success: res => {
-                img_urls.push(res.data)
-                if (img_urls.length === this.pics.length) {
-                     // this.send(img_urls.join(';'))
-                  this.send(img_urls)
-                }
-              },
-              fail: error => {
-                console.log('上传图片失败', error)
-                wepy.showToast({
-                  title: '上传图片失败',
-                  icon: 'none',
-                  duration: 3000
-                })
-              }
+        if (e.detail.userInfo) {
+          if (!this.content) {
+            wepy.showToast({
+              title: '请输入内容',
+              icon: 'none'
             })
+            return
+          }
+
+          if (this.pics.length) {
+            let img_urls = []
+            for (let i = 0; i < this.pics.length; i++) {
+              wx.request({
+                url: this.baseUrl + '/post-img',
+                method: 'POST',
+                data: this.pics[i].path,
+                header: {
+                  'Content-Type': 'text/plain;charset=UTF-8'
+                },
+                success: res => {
+                  img_urls.push(res.data)
+                  if (img_urls.length === this.pics.length) {
+                     // this.send(img_urls.join(';'))
+                    this.send(img_urls)
+                  }
+                },
+                fail: error => {
+                  console.log('上传图片失败', error)
+                  wepy.showToast({
+                    title: '上传图片失败',
+                    icon: 'none',
+                    duration: 3000
+                  })
+                }
+              })
+            }
+          } else {
+              // 不发图片只发文字的请求test
+            wepy.showLoading()
+              // this.send()
+            this.send()
           }
         } else {
-              // 不发图片只发文字的请求test
-          wepy.showLoading()
-              // this.send()
-          this.send()
+          // 从首页login  有openid 但是没走按钮点击获取getuserinfo弹窗获取到用户信息 没有弹窗
+          wepy.showToast({
+            title: '无授权暂时不提供发布功能',
+            icon: 'none',
+            duration: 3000
+          })
         }
       } else {
         wepy.login({
