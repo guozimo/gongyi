@@ -32,7 +32,7 @@
         <!-- 时间、删除按钮、点赞评论按钮 -->
         <view class='TDD-view'>
           <label>{{item.publishTime}}</label>
-          <button bindtap='delete' wx:if='{{item.openid===openId}}'>删除</button>
+          <button @tap='delete({{item}})' wx:if='{{item.openid===openId}}'>删除</button>
           <image    src='/images/wxdiscuss.png' data-id = 'discuss' class='discuss1'></image>
           <button bindgetuserinfo ='getUserInfo' 
             open-type='getUserInfo' wx:if='{{item.isShow&&!item.hasZan}}' data-index='{{index}}' class='zan_box'>
@@ -155,10 +155,9 @@
       },
 
   // 删除朋友圈
-      delete: function() {
-        this.deletePiece()
+      delete(item) {
+        this.deletePiece(item)
       },
-
   // 点击了点赞评论
       TouchDiscuss: function(index, e) {
         if (e.target.dataset.id !== 'discuss') {
@@ -339,7 +338,7 @@
       }
      // this.feedObj.contents[index].hasZan= !this.feedObj.contents[index].hasZan
     }
-    deletePiece() {
+    deletePiece(item) {
         // 删除单条动态
       wx.request({
         url: this.baseUrl + '/delete',
@@ -347,11 +346,24 @@
           'content-type': 'application/json' // 默认值
         },
         method: 'POST',
+        data: {
+          _id: item._id,
+          openid: item.openid
+        },
         success: res => {
-        // console.log('删除动态返回的数据', res)
-          wx.showToast({
-            title: '删除成功'
-          })
+          if (res.data.status) {
+            wx.showToast({
+              title: '删除成功',
+              duration: 3000
+            })
+            this.getFeed()
+            // 删除成功后刷新列表
+          } else {
+            wx.showToast({
+              title: '删除失败',
+              duration: 3000
+            })
+          }
         },
         fail: function (error) {
           wepy.hideLoading()
