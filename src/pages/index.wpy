@@ -126,7 +126,7 @@
       getUserInfo(e) {
         if (e.detail.userInfo) {
           wx.setStorageSync('userInfo', e.detail.userInfo)
-          this.userinfo = e.detail.userInfo
+          this.userInfo = e.detail.userInfo
           // console.log('e=====', e)
           this.changeStatus(e.target.dataset.index)
         } else {
@@ -304,6 +304,7 @@
                 // 把openid 存入storage中
                     if (res.data.openid) {
                       wx.setStorageSync('openId', res.data.openid)
+                      this.openId = res.data.openid
                     }
                 // zan 列表中把自己的名字本地加入
                     this.feedObj.contents[index].zan.push({'openid': res.data.openid || '', 'name': wx.getStorageSync('userInfo').nickName || '💗'})

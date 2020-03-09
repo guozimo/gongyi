@@ -294,6 +294,7 @@ export default class Index extends wepy.page {
           // 发布成功
           let openId = res.data.openid || ''
           wx.setStorageSync('openId', openId)
+          this.openId = openId
           wx.showToast({
             title: res.data.msg || '发布成功',
             duration: 1000,
