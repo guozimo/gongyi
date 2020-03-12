@@ -307,6 +307,10 @@ export default class Index extends wepy.page {
         wepy.hideLoading()
         if (res.data.status === 1) {
           // 发布成功
+          // 发布成功后把图片和text晴空
+          this.content = ''
+          this.pics = []
+          this.$apply()
           wx.showToast({
             title: res.data.msg || '发布成功',
             duration: 1000,
@@ -354,9 +358,12 @@ export default class Index extends wepy.page {
         wepy.hideLoading()
         if (res.data.status === 1) {
           // 发布成功
+          this.content = ''
+          this.pics = []
           let openId = res.data.openid || ''
           wx.setStorageSync('openId', openId)
           this.openId = openId
+          this.$apply()
           wx.showToast({
             title: res.data.msg || '发布成功',
             duration: 1000,
