@@ -23,6 +23,7 @@
 </template>
 <script>
 import wepy from 'wepy'
+import qiniuUploader from '@/utils/qiniuUploader'
 export default class Index extends wepy.page {
   onShareAppMessage() {
     return {
@@ -46,6 +47,7 @@ export default class Index extends wepy.page {
     openId: wx.getStorageSync('openId') || ''
   };
   onLoad() {
+    console.log('qiniuUploader-======', qiniuUploader)
   }
   methods = {
       // 删除已添加的图片
@@ -76,9 +78,6 @@ export default class Index extends wepy.page {
         sizeType: ['compressed'],
         sourceType: ['album', 'camera'],
         success: res => {
-          // this.setData({
-          //   pics: this.data.pics.concat(res.tempFiles)
-          // })
           this.pics = this.pics.concat(res.tempFiles)
           this.pics = this.pics.map((item, index) => {
             wx.getFileSystemManager().readFile({
@@ -141,6 +140,8 @@ export default class Index extends wepy.page {
                   })
                 }
               })
+
+              // 该用七牛云方式上传
             }
           } else {
               // 不发图片只发文字的请求test
@@ -223,6 +224,7 @@ export default class Index extends wepy.page {
       }
     }
   }
+  // 上传七牛云
   // 发布事件
   send(img_urls) {
     wx.request({

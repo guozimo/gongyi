@@ -26,7 +26,9 @@ export default class extends wepy.app {
       'pages/learnGroup/index',
       'pages/release', // 发表
       'pages/active/active',
-      'pages/about'// 关于我们页面
+      'pages/about', // 关于我们页面,
+      'pages/find'// 关于我们页面
+
       // 子页面
     ],
     window: {
@@ -35,6 +37,11 @@ export default class extends wepy.app {
       navigationBarTitleText: 'WeChat',
       navigationBarTextStyle: 'white',
       backgroundColor: '#138cff'
+    },
+    permission: {
+      'scope.userLocation': {
+        'desc': '你的位置信息将用于小程序位置接口的效果展示'
+      }
     },
     tabBar: {
       color: '#757982',
@@ -53,6 +60,12 @@ export default class extends wepy.app {
           text: '发表',
           iconPath: 'images/tabbar/release.png',
           selectedIconPath: 'images/tabbar/releaseactive.png'
+        },
+        {
+          pagePath: 'pages/find',
+          text: '发现',
+          iconPath: 'images/tabbar/fa.png',
+          selectedIconPath: 'images/tabbar/fa_active.png'
         },
         {
           pagePath: 'pages/me',
