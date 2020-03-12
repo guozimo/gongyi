@@ -78,19 +78,21 @@ export default class Index extends wepy.page {
         sizeType: ['compressed'],
         sourceType: ['album', 'camera'],
         success: res => {
+          // var filePath = res.tempFilePaths[0]
           this.pics = this.pics.concat(res.tempFiles)
-          this.pics = this.pics.map((item, index) => {
-            wx.getFileSystemManager().readFile({
-              filePath: item.path,
-              encoding: 'base64', // 这个是很重要的
-              success: res => { // 成功的回调
-             // 返回base64格式
-                item.path = 'data:image/png;base64,' + res.data
-                this.$apply()
-              }
-            })
-            return item
-          })
+
+          // this.pics = this.pics.map((item, index) => {
+          //   wx.getFileSystemManager().readFile({
+          //     filePath: item.path,
+          //     encoding: 'base64', // 这个是很重要的
+          //     success: res => { // 成功的回调
+          //    // 返回base64格式
+          //       item.path = 'data:image/png;base64,' + res.data
+          //       this.$apply()
+          //     }
+          //   })
+          //   return item
+          // })
           this.$apply()
         }
       })
@@ -116,33 +118,61 @@ export default class Index extends wepy.page {
 
           if (this.pics.length) {
             let img_urls = []
-            for (let i = 0; i < this.pics.length; i++) {
-              wx.request({
-                url: this.baseUrl + '/post-img',
-                method: 'POST',
-                data: this.pics[i].path,
-                header: {
-                  'Content-Type': 'text/plain;charset=UTF-8'
-                },
-                success: res => {
-                  img_urls.push(res.data)
+            this.getToken((token) => {
+              for (let i = 0; i < this.pics.length; i++) {
+                let filePath = this.pics[i]
+              // wx.request({
+              //   url: this.baseUrl + '/post-img',
+              //   method: 'POST',
+              //   data: this.pics[i].path,
+              //   header: {
+              //     'Content-Type': 'text/plain;charset=UTF-8'
+              //   },
+              //   success: res => {
+              //     img_urls.push(res.data)
+              //     if (img_urls.length === this.pics.length) {
+              //        // this.send(img_urls.join(';'))
+              //       this.send(img_urls)
+              //     }
+              //   },
+              //   fail: error => {
+              //     console.log('上传图片失败', error)
+              //     wepy.showToast({
+              //       title: '上传图片失败',
+              //       icon: 'none',
+              //       duration: 3000
+              //     })
+              //   }
+              // })
+              // 该用七牛云方式上传
+                let fileName = filePath.path.substr(30, 50)
+                console.log('token输出===', token)
+                qiniuUploader.upload(filePath.path, (res) => {
+                  console.log('七牛upload返回的resiiiii', res)
+                  let imgPath = 'http://q6xi3gokt.bkt.clouddn.com/' + res.key + '?imageslim'
+                  img_urls.push(imgPath)
                   if (img_urls.length === this.pics.length) {
                      // this.send(img_urls.join(';'))
                     this.send(img_urls)
                   }
-                },
-                fail: error => {
-                  console.log('上传图片失败', error)
+                }, (error) => {
+                  console.log('上传失败的返回，', error)
                   wepy.showToast({
                     title: '上传图片失败',
                     icon: 'none',
                     duration: 3000
                   })
-                }
-              })
-
-              // 该用七牛云方式上传
-            }
+                }, {
+                  uploadURL: 'https://up.qbox.me',
+                  domain: 'q6xi3gokt.bkt.clouddn.com', // // bucket 域名，下载资源时用到。如果设置，会在 success callback 的 res 参数加上可以直接使用的 ImageURL 字段。否则需要自己拼接
+                  key: fileName, // 自定义文件 key。如果不设置，默认为使用微信小程序 API 的临时文件名
+          // 以下方法三选一即可，优先级为：uptoken > uptokenURL > uptokenFunc
+                  uptoken: token // 由其他程序生成七牛 uptoken
+            // uptokenURL: 'UpTokenURL.com/uptoken', // 从指定 url 通过 HTTP GET 获取 uptoken，返回的格式必须是 json 且包含 uptoken 字段，例如： {"uptoken": "0MLvWPnyy..."}
+            // uptokenFunc: function() { return 'zxxxzaqdf' }
+                })
+              }
+            })
           } else {
               // 不发图片只发文字的请求test
             wepy.showLoading()
@@ -176,31 +206,61 @@ export default class Index extends wepy.page {
 
               if (this.pics.length) {
                 let img_urls = []
-                for (let i = 0; i < this.pics.length; i++) {
-                  wx.request({
-                    url: this.baseUrl + '/post-img',
-                    method: 'POST',
-                    data: this.pics[i].path,
-                    header: {
-                      'Content-Type': 'text/plain;charset=UTF-8'
-                    },
-                    success: res => {
-                      img_urls.push(res.data)
+                this.getToken((token) => {
+                  for (let i = 0; i < this.pics.length; i++) {
+                  // wx.request({
+                  //   url: this.baseUrl + '/post-img',
+                  //   method: 'POST',
+                  //   data: this.pics[i].path,
+                  //   header: {
+                  //     'Content-Type': 'text/plain;charset=UTF-8'
+                  //   },
+                  //   success: res => {
+                  //     img_urls.push(res.data)
+                  //     if (img_urls.length === this.pics.length) {
+                  //    // this.send(img_urls.join(';'))
+                  //       this.sendLetter(img_urls)
+                  //     }
+                  //   },
+                  //   fail: error => {
+                  //     console.log('上传图片失败', error)
+                  //     wepy.showToast({
+                  //       title: '上传图片失败',
+                  //       icon: 'none',
+                  //       duration: 3000
+                  //     })
+                  //   }
+                  // })
+                    let filePath = this.pics[i]
+                     // 该用七牛云方式上传
+                    let fileName = filePath.path.substr(30, 50)
+                    console.log('token输出===', token)
+                    qiniuUploader.upload(filePath.path, (res) => {
+                      console.log('七牛upload返回的resiiiii', res)
+                      let imgPath = 'http://q6xi3gokt.bkt.clouddn.com/' + res.key + '?imageslim'
+                      img_urls.push(imgPath)
                       if (img_urls.length === this.pics.length) {
                      // this.send(img_urls.join(';'))
                         this.sendLetter(img_urls)
                       }
-                    },
-                    fail: error => {
-                      console.log('上传图片失败', error)
+                    }, (error) => {
+                      console.log('上传失败的返回，', error)
                       wepy.showToast({
                         title: '上传图片失败',
                         icon: 'none',
                         duration: 3000
                       })
-                    }
-                  })
-                }
+                    }, {
+                      uploadURL: 'https://up.qbox.me',
+                      domain: 'q6xi3gokt.bkt.clouddn.com', // // bucket 域名，下载资源时用到。如果设置，会在 success callback 的 res 参数加上可以直接使用的 ImageURL 字段。否则需要自己拼接
+                      key: fileName, // 自定义文件 key。如果不设置，默认为使用微信小程序 API 的临时文件名
+          // 以下方法三选一即可，优先级为：uptoken > uptokenURL > uptokenFunc
+                      uptoken: token // 由其他程序生成七牛 uptoken
+            // uptokenURL: 'UpTokenURL.com/uptoken', // 从指定 url 通过 HTTP GET 获取 uptoken，返回的格式必须是 json 且包含 uptoken 字段，例如： {"uptoken": "0MLvWPnyy..."}
+            // uptokenFunc: function() { return 'zxxxzaqdf' }
+                    })
+                  }
+                })
               } else {
               // 不发图片只发文字的请求test
                 wepy.showLoading()
@@ -320,6 +380,26 @@ export default class Index extends wepy.page {
         wepy.hideLoading()
         console.error('只发文字请求接口失败=', error)
         wepy.showToast({title: '发布失败'})
+      }
+    })
+  }
+  getToken(cb) {
+    wx.request({
+      url: this.baseUrl + '/qiqiu_token',
+      data: {},
+      header: {
+        'content-type': 'application/json' // 默认值
+      },
+      method: 'POST',
+      success: (result) => {
+        console.log('token接口获取成功', result.data.token)
+        if (result.data.token) {
+          cb(result.data.token)
+          this.$apply()
+        }
+      },
+      fail: (eror) => {
+        console.log('token接口获取失败')
       }
     })
   }

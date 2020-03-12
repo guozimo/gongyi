@@ -77,11 +77,14 @@ export default class Index extends wepy.page {
   }
   onLoad() {
     this.setControls()
-  }
-  onShow() {
     this.scale = MAP_SCALE.DEFAULT
     this.mapCtx = wx.createMapContext('storeMap')
     this.getCurrentLocation()
+  }
+  onShow() {
+    // this.scale = MAP_SCALE.DEFAULT
+    // this.mapCtx = wx.createMapContext('storeMap')
+    // this.getCurrentLocation()
   }
   /**
    * 设置控件
