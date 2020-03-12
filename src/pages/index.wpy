@@ -72,6 +72,9 @@
 
     </view>
   </view>
+  <view class='loading'>
+    <image src='/images/loading.gif' class='load_img'/>
+  </view>
 </scroll-view>
 
 <!-- 评论按钮弹出框 -->
@@ -563,6 +566,15 @@ border:none;
   border-bottom: 1px solid whitesmoke;
   border-top: 1px solid whitesmoke;
 }
+.loading{
+  padding:20rpx;
+  box-sizing: border-box;
+  background:#ffffff;
+}
+ .load_img{
+    width: 100%;
+    height: 96rpx;
+  }
 
 .body-view{
   display: flex;
