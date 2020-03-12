@@ -72,7 +72,7 @@
 
     </view>
   </view>
-  <view class='loading'>
+  <view class='loading' wx:if='{{feedObj.contents.length}}'>
     <image src='/images/loading.gif' class='load_img'/>
   </view>
 </scroll-view>
