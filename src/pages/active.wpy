@@ -1,0 +1,75 @@
+<template>
+<view class='container'>
+  <view class='active_box' @tap='gotoweb'>
+    <image src='/images/bg1.png' class='pic'/>
+  </view>
+  <view class='active_box' @tap='gotoTree'>
+    <image src='/images/bg2.png' class='pic'/>
+    </view>
+</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import {timestampToTime} from '@/utils/util'
+  export default class Index extends wepy.page {
+    onShareAppMessage() {
+      return {
+        title: '讲述残疾人自己的故事!',
+        imageUrl: 'http://39.105.91.188/static/image/fm.jpg',
+        path: `/pages/index`
+      }
+    }
+    config = {
+      navigationBarTitleText: '活动'
+    }
+    components = {
+    }
+
+    data = {
+    }
+
+    computed = {
+    }
+
+    methods = {
+      gotoweb() {
+        wepy.navigateTo({
+          url: '/pages/active/active'
+        })
+      },
+      gotoTree() {
+        wepy.navigateTo({
+          url: '/pages/tree'
+        })
+      }
+    }
+    onLoad() {
+    }
+    onShow() {
+    }
+  }
+</script>
+
+<style lang="less">
+.container{
+  width:100%;
+  height:100%;
+  padding:20rpx;
+  box-sizing: border-box
+}
+.active_box {
+    width:100%;
+    height:371rpx;
+    margin-bottom:20rpx
+  }
+  image{
+    width:100%;
+    height:371rpx;
+  }
+  .pic{
+    display:block
+  }
+
+
+</style>

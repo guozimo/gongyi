@@ -46,7 +46,7 @@ const MAP_SCALE = {
 export default class Index extends wepy.page {
   onShareAppMessage() {
     return {
-      title: '为公公益是你我的家园!',
+      title: '讲述残疾人自己的故事!',
       imageUrl: 'http://39.105.91.188/static/image/fm.jpg',
       path: `/pages/index`
     }

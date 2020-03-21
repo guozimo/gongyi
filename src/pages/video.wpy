@@ -1,0 +1,506 @@
+<template>
+<view class="services_container">
+    <view class='top'>
+        <block wx:for="{{['公鸡课','公鸡汤']}}">
+            <view bindtap='onTabsItemTap' data-index='{{index}}' class="top-item">
+                <text class="{{currentTabsIndex==index?'on':''}}">{{item}}</text>
+            </view>
+        </block>
+    </view>
+    <view class='box'>
+        <view class='video' hidden="{{currentTabsIndex!=0}}">
+            <block wx:for="{{videoList}}">
+                <view class='video-item'>
+					<view class='wrapper'>
+						<video class='video-video' wx:if='{{index==videoIndex}}' id='video{{index}}' autoplay='{{true}}' show-center-play-btn="{{false}}" src='{{item.resource_add}}'></video>
+						<image class='video-video2' wx:if='{{index!=videoIndex}}' mode='aspectFill' src='{{item.coverimg}}'></image>
+						<image class='videoPlay' wx:if='{{index!=videoIndex}}' data-index='{{index}}' bindtap='videoPlay' src='/images/play.png'></image>
+					</view>
+                    <view class='video-name'>{{item.title}}</view>
+                    <view class='video-desc' style="{{item.upStatus?'':'display:-webkit-box'}}">{{item.description}}</view>
+                    <view class='video-bottom'>
+                        <view class='video-btn' data-index="{{index}}" bindtap='upDown'>
+                            <image hidden='{{item.upStatus}}' src='/images/slide.png'></image>
+                            <image hidden='{{!item.upStatus}}' src='/images/up.png'></image>
+                            <text>{{!item.upStatus?'展开':'收起'}}</text>
+                        </view>
+                    </view>
+                </view>
+            </block>
+        </view>
+        <view class='audio' hidden="{{currentTabsIndex!=1}}">
+            <block wx:for="{{audioList}}">
+                <view class='audio-item'>
+                    <view class='audio-left'>
+                        <image class='audio-audio' src='{{item.coverimg}}'></image>
+                        <image class='audio-status' hidden='{{musicIndex==index}}' data-index='{{index}}' bindtap='musicPlay' data-src="{{item.resource_add}}" src='/images/play.png'></image>
+                        <image class='audio-status' hidden='{{musicIndex!=index}}' data-index='{{index}}' bindtap='musicPause' data-src="{{item.resource_add}}" src='/images/pause.png'></image>
+                    </view>
+                    <view class='audio-content'>
+                        <view class='audio-name'>{{item.title}}</view>
+                        <view class='audio-desc'>{{item.description}}</view>
+                    </view>
+                    <view class='audio-right'>
+                        <image hidden='{{musicIndex!=index}}' src='/images/playing.gif'></image>
+                    </view>
+              </view>
+            </block>
+        </view>
+    </view>
+    <audio src='{{audioSrc}}' loop='{{true}}' style='display:none'></audio>
+    <!-- <view class='live_box'><image src='/images/live.png' class='live' /></view> -->
+</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import {timestampToTime} from '@/utils/util'
+  // 获取音频上下文
+const backgroundAudioManager = wx.getBackgroundAudioManager()
+export default class Index extends wepy.page {
+    onShareAppMessage() {
+      return {
+        title: '讲述残疾人自己的故事!',
+        imageUrl: '',
+        path: `/pages/video`
+      }
+    }
+    config = {
+      navigationBarTitleText: '公鸡课'
+    }
+    components = {
+    }
+
+    data = {
+      isLoadedAll: false,
+      musicIndex: null,
+      videoIndex: null,
+      currentTabsIndex: 0,
+      pageIndex: 1,
+      videoList: [
+        {
+          'coverimg': 'https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=2101732575,3737467236&fm=11&gp=0.jpg',
+          'description': '讲师:温馨家园社区主任曹老师,具有10余年残疾公益授课经验，曾带领海淀区温馨家园社区残友在全国剪纸比赛中取得优异成绩',
+          'id': '41',
+          'resource_add': 'http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400',
+          'title': ' 手把手教大家编草绳',
+          'type': '1'
+        },
+        {
+          'coverimg': 'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1584250404493&di=f052fbc540c7088a438832eb3e307cd1&imgtype=0&src=http%3A%2F%2Fpic1.nmgnews.com.cn%2F003%2F003%2F286%2F00300328626_f625c394.jpg',
+          'description': '讲师:温馨家园社区主任曹老师,具有10余年残疾公益授课经验，曾带领海淀区温馨家园社区残友在全国剪纸比赛中取得优异成绩',
+          'id': '42',
+          'resource_add': 'http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400',
+          'title': '教大家如何擦桌子',
+          'type': '1'
+        },
+        {
+          'coverimg': 'https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2622331735,310381165&fm=11&gp=0.jpg',
+          'description': '讲师:温馨家园社区主任曹老师,具有10余年残疾公益授课经验，曾带领海淀区温馨家园社区残友在全国剪纸比赛中取得优异成绩',
+          'id': '43',
+          'resource_add': 'http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400',
+          'title': '教大家怎样叠被子',
+          'type': '1'
+        },
+        {
+          'coverimg': 'https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=1738759746,312949804&fm=11&gp=0.jpg',
+          'description': '讲师:温馨家园社区主任曹老师,具有10余年残疾公益授课经验，曾带领海淀区温馨家园社区残友在全国剪纸比赛中取得优异成绩',
+          'id': '44',
+          'resource_add': 'http://wxsnsdy.tc.qq.com/105/20210/snsdyvideodownload?filekey=30280201010421301f0201690402534804102ca905ce620b1241b726bc41dcff44e00204012882540400&bizid=1023&hy=SH&fileparam=302c020101042530230204136ffd93020457e3c4ff02024ef202031e8d7f02030f42400204045a320a0201000400',
+          'title': '教大家如何剪纸',
+          'type': '1'
+        }
+      ],
+      audioList: [
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '59',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/10.mp3',
+          'title': '你的正能量，让人很扫兴',
+          'type': '1'
+        },
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '50',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/1.mp3',
+          'title': '尊重',
+          'type': '1'
+        },
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '51',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/2.mp3',
+          'title': '这就是生活',
+          'type': '1'
+        },
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '52',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/3.mp3',
+          'title': '只要放下，你就强大',
+          'type': '1'
+        },
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '53',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/4.mp3',
+          'title': '人的一生，永远不要弄破两样东西',
+          'type': '1'
+        },
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '54',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/5.mp3',
+          'title': '做人，请记住别人的好',
+          'type': '1'
+        },
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '55',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/6.mp3',
+          'title': '你品，你细品',
+          'type': '1'
+        },
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '56',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/7.mp3',
+          'title': '你懂我的难处，我不嫌弃你的一无所有',
+          'type': '1'
+        },
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '57',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/8.mp3',
+          'title': '人生难得一知己，如果遇到一定要珍惜',
+          'type': '1'
+        },
+        {
+          'coverimg': 'http://39.105.91.188/static/image/jt.jpg',
+          'description': '声源转自喜马拉雅',
+          'id': '58',
+          'resource_add': 'http://q6xi3gokt.bkt.clouddn.com/9.mp3',
+          'title': '和正能量的人在一起，真的很重要',
+          'type': '1'
+        }
+      ]
+    }
+
+    computed = {
+    }
+
+    methods = {
+      	// tap切换
+      onTabsItemTap: function (event) {
+        var index = event.currentTarget.dataset['index']
+        // this.setData({
+        //   currentTabsIndex: index
+        // })
+        this.currentTabsIndex = index
+		// tab切换时停止音乐播放
+        backgroundAudioManager.stop()
+
+		// tab切换时停止视频播放
+        var videoContextPrev = wx.createVideoContext('video' + this.data.videoIndex)
+        videoContextPrev.stop()
+
+		// 将当前播放视频、音频的index设置为空
+        // this.setData({
+        //   musicIndex: null,
+        //   videoIndex: null
+        // })
+        this.musicIndex = null
+        this.videoIndex = null
+      },
+	// 展开
+	// 原本没有upStatus这个字段，所以默认值为false
+      upDown(event) {
+        var index = event.currentTarget.dataset['index']
+        this.videoList[index].upStatus = !this.videoList[index].upStatus
+        // this.setData({
+        //   videoList: this.data.videoList
+        // })
+        this.videoList = this.videoList
+      },
+	// 播放音频
+      musicPlay(event) {
+        var src = event.currentTarget.dataset['src']
+        var index = event.currentTarget.dataset['index']
+        // this.setData({
+        //   musicIndex: index,
+        //   audioSrc: src
+        // })
+        this.musicIndex = index
+        this.audioSrc = src
+
+        backgroundAudioManager.src = src
+        backgroundAudioManager.title = '为公鸡汤'
+        backgroundAudioManager.play()
+      },
+	// 停止音频
+      musicPause(event) {
+        // this.setData({
+        //   musicIndex: null
+        // })
+        this.musicIndex = null
+        backgroundAudioManager.pause()
+      },
+	// 播放视频
+      videoPlay(event) {
+        var length = this.videoList.length
+        var index = event.currentTarget.dataset['index']
+
+        if (!this.videoIndex) { // 没有播放时播放视频
+          // this.setData({
+          //   videoIndex: index
+          // })
+          this.videoIndex = index
+          var videoContext = wx.createVideoContext('video' + index)
+          videoContext.play()
+        } else {
+			// 停止正在播放的视频
+          var videoContextPrev = wx.createVideoContext('video' + this.data.videoIndex)
+          videoContextPrev.stop()
+			// 将点击视频进行播放
+          // this.setData({
+          //   videoIndex: index
+          // })
+          this.videoIndex = index
+          var videoContextCurrent = wx.createVideoContext('video' + index)
+          videoContextCurrent.play()
+        }
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+.top {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    height: 80rpx;
+    background-color: #fff;
+    border-bottom: solid 1px #efefef;
+    position:fixed;
+    top:0;
+    left:0;
+    z-index:9999;
+
+}
+
+.top-item {
+    line-height: 80rpx;
+    flex: 1;
+    text-align: center;
+    font-family: PingFangSC-Regular;
+    font-size: 30rpx;
+    color: #666;
+    padding: 0 20rpx;
+}
+
+.top-item text {
+    display: inline-block;
+    line-height: 80rpx;
+    flex: 1;
+    text-align: center;
+    font-family: PingFangSC-Regular;
+    font-size: 30rpx;
+    color: #666;
+    padding: 0 20rpx;
+}
+
+.on {
+    border-bottom: solid 2px #db363e;
+}
+
+.box {
+    display: flex;
+    flex-direction: column;
+    width: 690rpx;
+    margin: auto;
+    margin-top:80rpx
+}
+
+.video {
+    display: flex;
+    flex-direction: column;
+}
+
+.video-item {
+    padding: 40rpx 0;
+    border-bottom: solid 1px #efefef;
+}
+.wrapper{
+	    width: 690rpx;
+    height: 400rpx;
+	position: relative;
+}
+.video-video {
+    width: 690rpx;
+    height: 400rpx;
+}
+.video-video2 {
+    width: 690rpx;
+    height: 400rpx;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 99;
+}
+.videoPlay{
+	position: absolute;
+    width: 60rpx;
+    height: 60rpx;
+    top: 50%;
+    left: 50%;
+    margin: -30rpx 0 0 -30rpx;
+	z-index: 100;
+}
+
+.video-name {
+    margin-top: 10rpx;
+    font-family: PingFangSC-Medium;
+    font-size: 34rpx;
+    color: #333;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+}
+
+.video-desc {
+    font-family: PingFangSC-Regular;
+    font-size: 26rpx;
+    color: #666;
+    margin-top: 10rpx;
+    /* display: -webkit-box; */
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.video-bottom {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.video-btn {
+    margin-top: 20rpx;
+    width: 103rpx;
+    height: 39rpx;
+    border: solid 1px #d2d2d2;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-btn image {
+    width: 19rpx;
+    height: 12rpx;
+    margin-right: 10rpx;
+}
+
+.video-btn text {
+    font-family: PingFangSC-Regular;
+    font-size: 22rpx;
+    color: #999;
+}
+
+.audio {
+    display: flex;
+    flex-direction: column;
+}
+
+.audio-item {
+    padding: 40rpx 0;
+    border-bottom: solid 1px #efefef;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.audio-left {
+    width: 204rpx;
+    height: 152rpx;
+    position: relative;
+    margin-right: 20rpx;
+}
+
+.audio-audio {
+    width: 204rpx;
+    height: 152rpx;
+}
+
+.audio-status {
+    position: absolute;
+    width: 60rpx;
+    height: 60rpx;
+    top: 50%;
+    left: 50%;
+    margin: -30rpx 0 0 -30rpx;
+}
+
+.audio-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.audio-name {
+    font-family: PingFangSC-Medium;
+    font-size: 34rpx;
+    color: #333;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
+}
+
+.audio-desc {
+    margin-top: 10rpx;
+    font-family: PingFangSC-Regular;
+    font-size: 26rpx;
+    color: #666;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+.audio-right {
+	width: 30rpx;
+    margin-left: 20rpx;
+    display: flex;
+    align-items: center;
+}
+
+.audio-right image {
+    width: 25rpx;
+    height: 29rpx;
+}
+  .live_box {
+  width:100rpx;
+  height:100rpx;
+  position:fixed;
+  bottom:50rpx;
+  right:20rpx;
+  z-index:999;
+  .live{
+    width:100%;
+    height:100%;
+  }
+  }
+
+</style>

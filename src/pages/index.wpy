@@ -89,10 +89,11 @@
 <script>
   import wepy from 'wepy'
   import {timestampToTime} from '@/utils/util'
+  let app = getApp()
   export default class Index extends wepy.page {
     onShareAppMessage() {
       return {
-        title: '为公公益是你我的家园!',
+        title: '讲述残疾人自己的故事!',
         imageUrl: 'http://39.105.91.188/static/image/fm.jpg',
         path: `/pages/index`
       }
@@ -111,7 +112,7 @@
       popTop: 0, // 弹出点赞评论框的位置
       popWidth: 0, // 弹出框宽度
       userName: wx.getStorageSync('userInfo').nickName || '',
-      baseUrl: 'http://39.105.91.188:8000/api',
+      baseUrl: 'https://www.canyouzhisheng.com/api',
       userInfo: wx.getStorageSync('userInfo') || {},
       matchUser: {}
 
@@ -122,14 +123,18 @@
 
     methods = {
       gotoweb() {
+        // wepy.navigateTo({
+        //   url: '/pages/active/active'
+        // })
         wepy.navigateTo({
-          url: '/pages/active/active'
+          url: '/pages/active'
         })
       },
       getUserInfo(e) {
         if (e.detail.userInfo) {
           wx.setStorageSync('userInfo', e.detail.userInfo)
           this.userInfo = e.detail.userInfo
+          // app.globalData.userInfo = this.userInfo
           // console.log('e=====', e)
           this.changeStatus(e.target.dataset.index)
         } else {
@@ -204,7 +209,15 @@
               })
                 // zan 列表中把自己的名字本地除去
               let len = this.feedObj.contents[index].zan.length - 1
-              this.feedObj.contents[index].zan.splice(len, 1)
+              let hasOne = this.feedObj.contents[index].zan.some((one, dex) => {
+                if (one.openId === wx.getStorageSync('openId')) {
+                  this.feedObj.contents[index].zan.splice(dex, 1)
+                }
+                return one.openId === wx.getStorageSync('openId')
+              })
+              if (!hasOne) {
+                this.feedObj.contents[index].zan.splice(len, 1)
+              }
               this.feedObj.contents[index].hasZan = !this.feedObj.contents[index].hasZan
             } else {
               wepy.showToast({
@@ -393,6 +406,7 @@
               item.isShow = false// 这个参数是默认不出展示box的
         // 还需要判断如果展示了box 展示的类型是点赞还是取消
               let hasZan = false
+             // item.zan = [ {openid: 'o3kHY5Tw-Tvk5YkxXt8URh9PCOjA', name: '老叔头'}, {openId: 'o3kHY5TUqyq1oY-UKi1ED1ykMDLE', name: '东子'}]
               hasZan = item.zan.length && item.zan.some((one) => {
                 return one.openid === this.openId
               })

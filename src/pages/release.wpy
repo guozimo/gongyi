@@ -24,10 +24,11 @@
 <script>
 import wepy from 'wepy'
 import qiniuUploader from '@/utils/qiniuUploader'
+let app = getApp()
 export default class Index extends wepy.page {
   onShareAppMessage() {
     return {
-      title: '为公公益是你我的家园!',
+      title: '讲述残疾人自己的故事!',
       imageUrl: 'http://39.105.91.188/static/image/fm.jpg',
       path: `/pages/index`
     }
@@ -42,7 +43,7 @@ export default class Index extends wepy.page {
     userinfo: null,
     content: null,
     pics: [],
-    baseUrl: 'http://39.105.91.188:8000/api',
+    baseUrl: 'https://www.canyouzhisheng.com/api',
     fileData: '',
     openId: wx.getStorageSync('openId') || ''
   };
@@ -106,6 +107,7 @@ export default class Index extends wepy.page {
       // 第一次都要走授权弹窗的
       wx.setStorageSync('userInfo', e.detail.userInfo)
       this.userinfo = e.detail.userInfo
+      // app.globalData.userInfo = this.userInfo
       if (wx.getStorageSync('openId')) {
         if (e.detail.userInfo) {
           if (!this.content) {
@@ -149,7 +151,7 @@ export default class Index extends wepy.page {
                 console.log('token输出===', token)
                 qiniuUploader.upload(filePath.path, (res) => {
                   console.log('七牛upload返回的resiiiii', res)
-                  let imgPath = 'http://q6xi3gokt.bkt.clouddn.com/' + res.key + '?imageslim'
+                  let imgPath = 'https://img.canyouzhisheng.com/' + res.key + '?imageslim'
                   img_urls.push(imgPath)
                   if (img_urls.length === this.pics.length) {
                      // this.send(img_urls.join(';'))
@@ -162,9 +164,15 @@ export default class Index extends wepy.page {
                     icon: 'none',
                     duration: 3000
                   })
+                  // wepy.showToast({
+                  //       title: JSON.stringify(error),
+                  //       icon: 'none',
+                  //       duration: 1000000
+                  //     })
                 }, {
                   uploadURL: 'https://up.qbox.me',
-                  domain: 'q6xi3gokt.bkt.clouddn.com', // // bucket 域名，下载资源时用到。如果设置，会在 success callback 的 res 参数加上可以直接使用的 ImageURL 字段。否则需要自己拼接
+                  // q6xi3gokt.bkt.clouddn.com
+                  domain: 'img.canyouzhisheng.com', // // bucket 域名，下载资源时用到。如果设置，会在 success callback 的 res 参数加上可以直接使用的 ImageURL 字段。否则需要自己拼接
                   key: fileName, // 自定义文件 key。如果不设置，默认为使用微信小程序 API 的临时文件名
           // 以下方法三选一即可，优先级为：uptoken > uptokenURL > uptokenFunc
                   uptoken: token // 由其他程序生成七牛 uptoken
@@ -237,7 +245,7 @@ export default class Index extends wepy.page {
                     console.log('token输出===', token)
                     qiniuUploader.upload(filePath.path, (res) => {
                       console.log('七牛upload返回的resiiiii', res)
-                      let imgPath = 'http://q6xi3gokt.bkt.clouddn.com/' + res.key + '?imageslim'
+                      let imgPath = 'https://img.canyouzhisheng.com/' + res.key + '?imageslim'
                       img_urls.push(imgPath)
                       if (img_urls.length === this.pics.length) {
                      // this.send(img_urls.join(';'))
@@ -250,9 +258,14 @@ export default class Index extends wepy.page {
                         icon: 'none',
                         duration: 3000
                       })
+                      //  wepy.showToast({
+                      //   title: JSON.stringify(error),
+                      //   icon: 'none',
+                      //   duration: 1000000
+                      // })
                     }, {
                       uploadURL: 'https://up.qbox.me',
-                      domain: 'q6xi3gokt.bkt.clouddn.com', // // bucket 域名，下载资源时用到。如果设置，会在 success callback 的 res 参数加上可以直接使用的 ImageURL 字段。否则需要自己拼接
+                      domain: 'img.canyouzhisheng.com', // // bucket 域名，下载资源时用到。如果设置，会在 success callback 的 res 参数加上可以直接使用的 ImageURL 字段。否则需要自己拼接
                       key: fileName, // 自定义文件 key。如果不设置，默认为使用微信小程序 API 的临时文件名
           // 以下方法三选一即可，优先级为：uptoken > uptokenURL > uptokenFunc
                       uptoken: token // 由其他程序生成七牛 uptoken

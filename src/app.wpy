@@ -27,7 +27,10 @@ export default class extends wepy.app {
       'pages/release', // 发表
       'pages/active/active',
       'pages/about', // 关于我们页面,
-      'pages/find'// 关于我们页面
+      'pages/find', // 关于我们页面
+      'pages/video', // 录播课程列表
+      'pages/tree', // 种树页面
+      'pages/active'// 种树页面
 
       // 子页面
     ],
@@ -67,6 +70,12 @@ export default class extends wepy.app {
           iconPath: 'images/tabbar/fa.png',
           selectedIconPath: 'images/tabbar/fa_active.png'
         },
+        // {
+        //   pagePath: 'pages/video',
+        //   text: '课程',
+        //   iconPath: 'images/tabbar/video.png',
+        //   selectedIconPath: 'images/tabbar/video-active.png'
+        // },
         {
           pagePath: 'pages/me',
           text: '我的',

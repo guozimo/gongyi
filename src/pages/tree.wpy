@@ -1,0 +1,417 @@
+<template>
+<view class="page">
+  <!-- <image class="absolute" src="/images/bg_grass.png" mode="widthFix" style="width:100%;">
+  </image> -->
+
+  <!-- 流动的云 -->
+  <view class="flowingCloud">
+    <image src="/images/cloud1.png" mode="widthFix" style="width:40%;">
+    </image>
+  </view>
+
+  <!-- 静止的云 -->
+  <view class="staticCloud">
+    <image src="/images/cloud2.png" mode="widthFix" style="width:50%;">
+    </image>
+  </view>
+
+
+
+
+  <view class="tree">
+    <image src="{{treePng}}" mode="widthFix" style="width:20%;" bindtap='touchTree' animation="{{animTreeSwingData}}">
+    </image>
+  </view>
+
+  <!-- 浇水壶 -->
+  <view class="waterCan">
+    <image src="/images/water.png" mode="widthFix" style="width:20%;" bindtap='onWaterCanTouched' animation="{{animWaterCan}}" bindanimationstart="{{animationstart}}" bindanimationend="{{animationend}}"/>
+  </view>
+
+ 
+
+  <!-- 下落的水 -->
+  <view class=" {{showOrHidden?'waterFallShow':'waterFallHide'}}">
+    <image src="/images/waterFull.png" mode="widthFix" style="width:10%;" animation="{{animWaterFall}}">
+    </image>
+  </view>
+
+
+
+
+  <!-- 用户当前水量-->
+  <view class="userinfo">
+    <image open-type="getUserInfo" bindgetuserinfo="onGetUserInfo" class="userinfo-avatar" style="background-image: url({{avatarUrl}})"></image>
+
+    <view>
+      <button class="userinfo-nickname" bindtap="onGetOpenid">{{localExperence}}
+      </button>
+    </view>
+  </view>
+
+  <!-- 用户当前水量-->
+  <view class="userinfo">
+    <image open-type="getUserInfo" bindgetuserinfo="onGetUserInfo" class="userinfo-avatar" src="/images/forest.png"></image>
+
+    <view>
+      <button class="userinfo-nickname" bindtap="onGetOpenid">{{treesCoount}}
+      </button>
+    </view>
+  </view>
+
+</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  // import {timestampToTime} from '@/utils/util'
+  var app = getApp()
+  let animTreeSwing
+const initData = '当前经验值：'
+// const db = wx.cloud.database()
+// const _ = db.command
+const TAG = 'Tree'
+var lastAwardTime
+var serverExp
+var docid
+export default class Index extends wepy.page {
+    onShareAppMessage() {
+      return {
+        title: '讲述残疾人自己的故事!',
+        // imageUrl: 'http://39.105.91.188/static/image/fm.jpg',
+        imageUrl: 'http://39.105.91.188/static/image/fm.jpg',
+        path: `/pages/tree`
+      }
+    }
+    config = {
+      navigationBarTitleText: '养鸡场'
+    }
+    components = {
+    }
+
+    data = {
+      animWaterCan: {}, // 浇水壶的动画
+      animWaterFall: {}, // 水滴下落的动画
+      animTreeSwingData: {},
+      showOrHidden: false, // 判断显示与否的，true表示显示，反之隐藏
+      text: initData,
+      avatarUrl: '/images/user-unlogin.png',
+      treePng: '/images/tree_1.png',
+      userInfo: '',
+      logged: false,
+      takeSession: false,
+      requestResult: '',
+      localwater: 20,
+      localExperence: '0g',
+      usedWater: 0,
+      treesCoount: 'trees: 0',
+      lastanswertime: '2020/3/17 00:00:00'
+    }
+
+    computed = {
+    }
+// 创建水壶动画
+    refreshList () {
+      var that = this
+
+      let animation = wx.createAnimation({
+        duration: 800,
+        timingFunction: 'linear'
+      })
+      animation
+      .translate(50, -300)
+      .rotate(-45)
+      .step()
+
+      animation
+      .rotate(44)
+      .step()
+
+      animation
+      .translate(0, 0)
+      .rotate(0)
+      .step()
+
+      this.setData({
+        animWaterCan: animation.export()
+      })
+      // this.animWaterCan = animation.export()
+      // this.$apply()
+
+    // 延时1S显示水滴，并执行水滴下落的动画
+      var timerTem = setTimeout(function () {
+        that.setData({
+          showOrHidden: true
+        })
+       // that.showOrHidden = true
+        that.waterFullAnim()
+      //  that.$apply()
+      }, 1000)
+
+  // 延时2S显示水滴，隐藏水滴
+      var timerTem1 = setTimeout(function () {
+        that.setData({
+          showOrHidden: false
+        })
+        // that.showOrHidden = false
+        // that.$apply()
+      }, 2000)
+    }
+     // 创建水滴动画
+    waterFullAnim () {
+      let animWater = wx.createAnimation({
+        duration: 800,
+        timingFunction: 'linear'
+      })
+    // 原地下落40px
+      animWater
+      .translate(0, 40)
+      .rotate(0)
+      .step()
+
+      this.setData({
+        animWaterFall: animWater.export()
+      })
+      // this.animWaterFall = animWater.export()
+  // 2S后恢复原始位置
+      var that = this
+      setTimeout(function () {
+        animWater.translate(0, -40).step({
+          duration: 0,
+          transformOrigin: '50%,50%',
+          timingFunction: 'linear'
+        })
+        that.setData({
+          animWaterFall: animWater.export()
+        })
+        // that.animWaterFall = animWater.export()
+        // that.$apply()
+      }, 2000)
+    }
+    methods = {
+      animationstart: function (event) {
+        console.log('Tree:', event)
+      },
+
+      animationend: function (event) {
+        console.log('Tree:', event)
+      },
+
+      touchTree: function () {
+        if (animTreeSwing == null) {
+          animTreeSwing = wx.createAnimation({
+            duration: 200,
+            timingFunction: 'linear'
+          })
+        }
+
+        animTreeSwing
+      .rotate(10)
+      .step()
+
+        animTreeSwing
+      .rotate(-10)
+      .step()
+
+        animTreeSwing
+      .rotate(0)
+      .step()
+
+        this.setData({
+          animTreeSwingData: animTreeSwing.export()
+        })
+        // this.animTreeSwingData = animTreeSwing.export()
+        // this.$apply()
+      },
+
+  // 点击了浇水壶，进行浇水
+      onWaterCanTouched: function () {
+        if (this.localwater < 10) {
+          wepy.showToast({
+            title: '能量不足',
+            duration: 3000,
+            icon: ''
+          })
+        } else {
+      // 执行动画
+          this.refreshList()
+    // 更新服务器数据，-10
+          // this.reduceServerWater()
+        }
+      },
+
+  // 执行浇水操作
+      reduceServerWater: function () {
+  // 减少能量
+      },
+
+  // 判断树苗是否需要成长
+      judgeToGrowUp: function (usedWater) {
+        var that = this
+        console.log(TAG, 'judgeToGrowUp >>')
+        var b = parseInt((usedWater % 100) / 10)
+        var h = parseInt(usedWater / 100)
+        console.log(TAG, 'judgeToGrowUp b:' + b + ' h:' + h)
+        if (b <= 3) {
+          that.setData({
+            treePng: '/images/tree_1.png'
+          })
+        } else if (b > 3 && b <= 6) {
+          that.setData({
+            treePng: '/images/tree_2.png'
+          })
+        } else if (b > 6) {
+          that.setData({
+            treePng: '/images/tree_3.png'
+          })
+        }
+
+        that.setData({
+          treesCoount: 'trees:' + h
+        })
+      }
+    }
+    onLoad(options) {
+      this.avatarUrl = wx.getStorageSync('userInfo').avatarUrl || ''
+      console.log('this.avatarUrl====', this.avatarUrl)
+      this.userInfo = wx.getStorageSync('userInfo')
+    }
+  }
+</script>
+
+<style lang="less">
+/* miniprogram/main/tree.wxss */
+button{
+  padding:0
+}
+button::after{
+border:none;
+}
+page {
+  width: 100%;
+  height: 100%;
+  background: url(https://note.youdao.com/yws/api/personal/file/C721EA270E244623BB38A4DB0793B506?method=download&shareKey=465145e3e8f292883b67b0bd8598a66a) no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+/* 浇水壶的style */
+
+.waterCan {
+  bottom: 50px;
+  left: 0;
+  right: 0;
+  padding: 0px;
+  margin: 0px;
+  text-align: center;
+  position: absolute;
+  z-index: 3;
+}
+
+/* 样式：水滴下落 */
+
+.waterFallHide {
+  display: none;
+  bottom: 280px;
+  left: 0;
+  right: 0;
+  padding: 0px;
+  margin: 0px;
+  text-align: center;
+  position: absolute;
+  z-index: 3;
+}
+
+.waterFallShow {
+  display: block;
+  bottom: 280px;
+  left: 0;
+  right: 0;
+  padding: 0px;
+  margin: 0px;
+  text-align: center;
+  position: absolute;
+  z-index: 3;
+}
+
+/* 样式：静止的云 */
+
+.staticCloud {
+  position: absolute;
+  z-index: 3;
+  width: 40%;
+  height: 40%;
+  top: 50px;
+  right: 0;
+  bottom: 0;
+}
+
+/* 样式：完成任务 *
+
+/* 样式：流动的云 
+  从左到右，8S完成*/
+
+.flowingCloud {
+  position: absolute;
+  z-index: 3;
+  width: 40%;
+  height: 40%;
+  top: 99px;
+  right: 0;
+  bottom: 0;
+  animation: cloud 8s linear infinite;
+}
+
+@keyframes cloud {
+  from {
+    transform: translate3d(-700rpx, 0, 0);
+  }
+
+  to {
+    transform: translate3d(300rpx, 0, 0);
+  }
+}
+
+.tree {
+  bottom: 400rpx;
+  left: 0;
+  right: 0;
+  padding: 0px;
+  margin: 0px;
+  text-align: center;
+  position: absolute;
+  z-index: 3;
+}
+
+.userinfo {
+  margin-top: 40rpx;
+  height: 100rpx;
+  width: 40%;
+  background: #67ccd3;
+  display: flex;
+  flex-direction: row;
+  border-bottom-left-radius: 20px;
+  border-top-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  border-top-right-radius: 20px;
+  transition: all 300ms ease;
+}
+
+.userinfo-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  margin: 10rpx;
+  border-radius: 50%;
+  background: #67ccd3;
+  background-size: cover;
+}
+
+.userinfo-nickname {
+  font-weight: bolder;
+  font-size: 32rpx;
+  color: #10737a;
+  background: #67ccd3;
+  background-size: cover;
+}
+
+</style>
