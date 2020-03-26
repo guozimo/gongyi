@@ -39,8 +39,23 @@
         })
       },
       gotoTree() {
-        wepy.navigateTo({
-          url: '/pages/tree'
+        // wepy.navigateTo({
+        //   url: '/pages/tree'
+        // })
+        wx.navigateToMiniProgram({
+          appId: 'wx7c66f32bc9bc2343',
+          path: 'page/index/index',
+          extraData: {
+            foo: 'bar'
+          },
+          envVersion: 'release',
+          success(res) {
+              // 打开成功
+            console.log('打开成功')
+          },
+          fail(res) {
+            console.log('打开失败', res)
+          }
         })
       }
     }

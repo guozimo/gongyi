@@ -99,7 +99,7 @@
       }
     }
     config = {
-      navigationBarTitleText: '圈子'
+      navigationBarTitleText: '觅知音'
     }
     components = {
     }

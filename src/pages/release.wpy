@@ -45,10 +45,35 @@ export default class Index extends wepy.page {
     pics: [],
     baseUrl: 'https://www.canyouzhisheng.com/api',
     fileData: '',
-    openId: wx.getStorageSync('openId') || ''
+    openId: wx.getStorageSync('openId') || '',
+    access_token: ''
   };
   onLoad() {
     console.log('qiniuUploader-======', qiniuUploader)
+    this.getAccessToken()
+  }
+  getAccessToken() {
+    wx.request({
+      url: 'https://api.weixin.qq.com/cgi-bin/token',
+      method: 'GET',
+      data: {
+        grant_type: 'client_credential',
+        appid: 'wxf0be5003a725ab4c',
+        secret: '84513565cd99b3895c3dd2c9b31d32f1'
+      },
+      header: {
+        'Content-Type': 'text/plain;charset=UTF-8'
+      },
+      success: res => {
+       // console.log('res======access_token', res)
+        this.access_token = res.data.access_token || ''
+        console.log('this.access_token=====', this.access_token)
+        this.$apply()
+      },
+      error: error => {
+        console.log('error======access_token', error)
+      }
+    })
   }
   methods = {
       // 删除已添加的图片
@@ -299,107 +324,154 @@ export default class Index extends wepy.page {
   }
   // 上传七牛云
   // 发布事件
+
   send(img_urls) {
     wx.request({
-      url: this.baseUrl + '/text',
+      url: `https://api.weixin.qq.com/wxa/msg_sec_check?access_token=${this.access_token}`,
       header: {
         'content-type': 'application/json' // 默认值
       },
       method: 'POST',
       data: {
-        code: '',
-        user_name: wx.getStorageSync('userInfo').nickName || '为公官方',
-        user_avatar: wx.getStorageSync('userInfo').avatarUrl || '',
-        gender: wx.getStorageSync('userInfo').gender || 1,
-        text: this.content || '',
-        imgs: img_urls || [],
-        openid: wx.getStorageSync('openId') || ''
+        content: this.content || ''
       },
       success: res => {
-        console.log('只发文字返回的数据res.data====', res.data)
-        wepy.hideLoading()
-        if (res.data.status === 1) {
+        console.log('校验成功了======', res)
+        if (res.data.errcode === 0) {
+          // 成功了
+          wx.request({
+            url: this.baseUrl + '/text',
+            header: {
+              'content-type': 'application/json' // 默认值
+            },
+            method: 'POST',
+            data: {
+              code: '',
+              user_name: wx.getStorageSync('userInfo').nickName || '为公官方',
+              user_avatar: wx.getStorageSync('userInfo').avatarUrl || '',
+              gender: wx.getStorageSync('userInfo').gender || 1,
+              text: this.content || '',
+              imgs: img_urls || [],
+              openid: wx.getStorageSync('openId') || ''
+            },
+            success: res => {
+              console.log('只发文字返回的数据res.data====', res.data)
+              wepy.hideLoading()
+              if (res.data.status === 1) {
           // 发布成功
           // 发布成功后把图片和text晴空
-          this.content = ''
-          this.pics = []
-          this.$apply()
-          wx.showToast({
-            title: res.data.msg || '发布成功',
-            duration: 1000,
-            success: function() {
-              setTimeout(() => {
-                wepy.switchTab({
-                  url: '/pages/index'
+                this.content = ''
+                this.pics = []
+                this.$apply()
+                wx.showToast({
+                  title: res.data.msg || '发布成功',
+                  duration: 1000,
+                  success: function() {
+                    setTimeout(() => {
+                      wepy.switchTab({
+                        url: '/pages/index'
+                      })
+                    }, 1000)
+                  }
                 })
-              }, 1000)
+              } else {
+          // 发布失败
+                wx.showToast({
+                  title: res.data.msg || '发布失败',
+                  duration: 3000
+                })
+              }
+            },
+            fail: function (error) {
+              wepy.hideLoading()
+              console.error('只发文字请求接口失败=', error)
+              wepy.showToast({title: '发布失败'})
             }
           })
         } else {
-          // 发布失败
-          wx.showToast({
-            title: res.data.msg || '发布失败',
-            duration: 3000
-          })
+          // 失败了
+          wepy.showToast({title: '内容违规'})
         }
       },
-      fail: function (error) {
-        wepy.hideLoading()
-        console.error('只发文字请求接口失败=', error)
-        wepy.showToast({title: '发布失败'})
+      fail: (error) => {
+        console.log('校验失败了======', error)
+        wepy.showToast({title: '内容违规'})
       }
     })
   }
   sendLetter(img_urls) {
     wx.request({
-      url: this.baseUrl + '/text',
+      url: `https://api.weixin.qq.com/wxa/msg_sec_check?access_token=${this.access_token}`,
       header: {
         'content-type': 'application/json' // 默认值
       },
       method: 'POST',
       data: {
-        code: this.code || '',
-        user_name: this.userinfo.nickName || '为公官方',
-        user_avatar: this.userinfo.avatarUrl || '',
-        gender: this.userinfo.gender || 1,
-        text: this.content || '',
-        imgs: img_urls || [],
-        openid: this.openId || ''
+        content: this.content || ''
       },
       success: res => {
-        console.log('只发文字返回的数据res.data====', res.data)
-        wepy.hideLoading()
-        if (res.data.status === 1) {
+        console.log('校验成功了======', res)
+        if (res.data.errcode === 0) {
+          // 成功了
+          wx.request({
+            url: this.baseUrl + '/text',
+            header: {
+              'content-type': 'application/json' // 默认值
+            },
+            method: 'POST',
+            data: {
+              code: this.code || '',
+              user_name: this.userinfo.nickName || '为公官方',
+              user_avatar: this.userinfo.avatarUrl || '',
+              gender: this.userinfo.gender || 1,
+              text: this.content || '',
+              imgs: img_urls || [],
+              openid: this.openId || ''
+            },
+            success: res => {
+              console.log('只发文字返回的数据res.data====', res.data)
+              wepy.hideLoading()
+              if (res.data.status === 1) {
           // 发布成功
-          this.content = ''
-          this.pics = []
-          let openId = res.data.openid || ''
-          wx.setStorageSync('openId', openId)
-          this.openId = openId
-          this.$apply()
-          wx.showToast({
-            title: res.data.msg || '发布成功',
-            duration: 1000,
-            success: function() {
-              setTimeout(() => {
-                wepy.switchTab({
-                  url: '/pages/index'
+                this.content = ''
+                this.pics = []
+                let openId = res.data.openid || ''
+                wx.setStorageSync('openId', openId)
+                this.openId = openId
+                this.$apply()
+                wx.showToast({
+                  title: res.data.msg || '发布成功',
+                  duration: 1000,
+                  success: function() {
+                    setTimeout(() => {
+                      wepy.switchTab({
+                        url: '/pages/index'
+                      })
+                    }, 1000)
+                  }
                 })
-              }, 1000)
+              } else {
+          // 发布失败
+                wx.showToast({
+                  title: res.data.msg || '发布失败',
+                  duration: 3000
+                })
+              }
+            },
+            fail: function (error) {
+              wepy.hideLoading()
+              console.error('只发文字请求接口失败=', error)
+              wepy.showToast({title: '内容违规'})
             }
           })
         } else {
-          // 发布失败
-          wx.showToast({
-            title: res.data.msg || '发布失败',
-            duration: 3000
-          })
+          // 失败了
+          wepy.showToast({title: '内容违规'})
         }
       },
-      fail: function (error) {
-        wepy.hideLoading()
-        console.error('只发文字请求接口失败=', error)
-        wepy.showToast({title: '发布失败'})
+      fail: (error) => {
+        console.log('校验失败了======', error)
+        wepy.showToast({title: '内容违规'})
       }
     })
   }
