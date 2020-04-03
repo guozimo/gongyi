@@ -44,7 +44,7 @@
         // })
         wx.navigateToMiniProgram({
           appId: 'wx7c66f32bc9bc2343',
-          path: 'page/index/index',
+          path: 'pages/index/index',
           extraData: {
             foo: 'bar'
           },
